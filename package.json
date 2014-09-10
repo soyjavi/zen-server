@@ -16,6 +16,9 @@
   "dependencies": {
     "coffee-script" : "*"
   },
+  "devDependencies": {
+    "hyperquest" : "*"
+  },
   "main": "./index.js",
   "engines": {
     "node": "*"
