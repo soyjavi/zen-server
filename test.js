@@ -1,5 +1,6 @@
 var http = require('http');
 var hyperquest = require('hyperquest');
+var request = require('request');
 
 /* -- Making calls ---------------------------------------------------------- */
 var interval_id = setInterval(function(){proxy();}, 2500);
@@ -12,8 +13,17 @@ var proxy = function() {
   hyperquest('http://localhost:8888/domain/subdomain/');
   hyperquest('http://localhost:8888/domain/subdomain/endpoint?name=javi&twitter=soyjavi');
 
-  hyperquest.post('http://localhost:8888/domain/subdomain');
-  hyperquest.put('http://localhost:8888/domain/subdomain');
+
+  request({
+    uri: "http://localhost:8888/domain/subdomain/endpoint?op=true",
+    method: "POST",
+    form: {
+      name: "Javi",
+      twitter: "@soyjavi"
+    }
+  } , function(error, response, body) {} );
+
+  // hyperquest.put('http://localhost:8888/domain/subdomain');
   hyperquest.delete('http://localhost:8888/domain/subdomain');
 
 };
