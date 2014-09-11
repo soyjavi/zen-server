@@ -10,6 +10,7 @@ var proxy = function() {
   j = (j < 3) ? (j + 1) : 0
   hyperquest('http://localhost:8000');
   hyperquest('http://localhost:8000/domain');
+  hyperquest('http://localhost:8000/user/cataflu');
   hyperquest('http://localhost:8000/domain/subdomain');
   // hyperquest('http://localhost:8000/domain/subdomain/');
   hyperquest('http://localhost:8000/domain/subdomain/endpoint?name=javi&twitter=soyjavi');

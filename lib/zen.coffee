@@ -73,10 +73,20 @@ module.exports =
               parameters[key] = value for key, value of querystring.parse body
 
             request.parameters = parameters
+            request.required = (values = []) ->
+              success = true
+              for name in values when not @parameters[name]?
+                success = false
+                response.json message: "#{name} is required", 400
+                break
+              success
+
             response.json = (value, code, headers) ->
               run @, JSON.stringify(value), code, "application/json", headers
+
             response.html = (value, code, headers) ->
               run @, value.toString(), code, "text/html", headers
+
             endpoint.callback request, response, next
 
           parameters[key] = value for key, value of url.parse(request.url, true).query
