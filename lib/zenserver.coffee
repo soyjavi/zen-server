@@ -6,41 +6,29 @@ https         = require "https"
 url           = require "url"
 querystring   = require "querystring"
 
-ZenServer =
+ZenServer     = require "./zen"
 
+
+module.exports =
   run: ->
-    console.log "ZENServer: CTRL + C to shutdown"
+    app = new ZenServer port = 8000
 
-    server = http.createServer((request, response) ->
-      body = ""
+    app.get "/api", (request, response, next) ->
+      console.log 1
+      response.end()
 
-      parameters = {}
+    app.get "/user/:id", (request, response, next) ->
+      console.log 2
+      response.end()
 
-      request.on "data", (chunk) -> body += chunk.toString()
+    app.get "/domain/:id/:context", (request, response, next) ->
+      response.json request.parameters
 
-      request.on "end", (message) ->
-        if body isnt ""
-          parameters[key] = value for key, value of querystring.parse body
+    app.post "/domain/:id/:context", (request, response, next) ->
+      response.end()
 
-        console.log " PARAMETERS :"
-        for key, value of parameters
-          console.log "  -", key, value
-        response.end()
+    # app.post "/api", (request, response, next) ->
 
-      unless request.url is "/favicon.ico"
-        console.log "#{request.method} #{request.url}"
-        console.log " NAMESPACES:"
-        for key in url.parse(request.url).pathname.split("/").slice(1)
-          console.log "  -", key
-        parameters = url.parse(request.url, true).query
+    # app.put "/api", (request, response, next) ->
 
-      response.writeHead 200, "Content-Type": "text/plain"
-      response.write "ZENserver"
-      # response.end()
-    )
-
-    server.setTimeout 1000, (callback) ->
-      console.log ">"
-    server.listen 8888
-
-module.exports = ZenServer
+    # app.delete "/api", (request, response, next) ->
