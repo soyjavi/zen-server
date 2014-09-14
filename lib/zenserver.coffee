@@ -1,17 +1,19 @@
 "use strict"
 
 # Libraries
-http          = require "http"
-https         = require "https"
-url           = require "url"
-querystring   = require "querystring"
-
 ZenServer     = require "./zen"
-
 
 module.exports =
   run: ->
     app = new ZenServer port = 8000
+
+    app.get "/www", (request, response, next) ->
+      data =
+        title : "zenserver"
+        author:
+          name    : "Javi Jiménez"
+          twitter : "@soyjavi"
+      response.page "index", data, ["partial"]
 
     app.get "/api", (request, response, next) ->
       response.end()

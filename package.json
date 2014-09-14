@@ -14,7 +14,9 @@
     "email": "javi@tapquo.com"
   },
   "dependencies": {
-    "coffee-script" : "*"
+    "coffee-script" : "*",
+    "js-yaml"       : "*",
+    "mustache"      : "*"
   },
   "devDependencies": {
     "hyperquest" : "*",

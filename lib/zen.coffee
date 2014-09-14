@@ -12,6 +12,8 @@ https         = require "https"
 url           = require "url"
 querystring   = require "querystring"
 
+page          = require "./zen.page"
+
 module.exports =
 
   class ZenServer
@@ -87,6 +89,8 @@ module.exports =
             response.html = (value, code, headers) ->
               run @, value.toString(), code, "text/html", headers
 
+            response.page = page
+
             endpoint.callback request, response, next
 
           parameters[key] = value for key, value of url.parse(request.url, true).query
@@ -96,6 +100,8 @@ module.exports =
           response.write "Unknown"
           response.end()
 
+      @instance.on 'error', (err) ->
+        console.log 'there was an error:', err.message
       @instance.setTimeout @timeout, (callback) -> @ if @timeout
       @instance.listen @port
       @instance
