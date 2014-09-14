@@ -21,5 +21,3 @@ global.config = yaml.safeLoad(fs.readFileSync(endpoint_path, 'utf8'));
 // -- Run ----------------------------------------------------------------------
 // module.exports = require('./lib/zenserver');
 require('./lib/zenserver').run();
-
-
