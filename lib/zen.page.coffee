@@ -1,13 +1,21 @@
 "use strict"
 
-mustache = require "mustache"
 fs       = require "fs"
+mustache = require "mustache"
+
 
 module.exports = (file, data, partials = []) ->
-  directory = __dirname + '/../www/templates'
-  file = fs.readFileSync "#{directory}/#{file}.mustache", "utf8"
-
   files = {}
-  for partial in partials
-    files[partial] = fs.readFileSync "#{directory}/#{partial}.mustache", "utf8"
-  @html mustache.to_html file, data, files
+  files[partial] = __mustache partial for partial in partials or []
+  @html mustache.to_html __mustache(file), data, files
+
+
+__mustache = (file) ->
+  dir = "#{__dirname}/../../../www/mustache/"
+  try
+    fs.readFileSync "#{dir}#{file}.mustache", "utf8"
+  catch error
+    try
+      fs.readFileSync "#{dir}404.mustache", "utf8"
+    catch error
+      "<h1> 404 - Not found</h1>"

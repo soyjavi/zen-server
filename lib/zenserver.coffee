@@ -3,9 +3,12 @@
 # Libraries
 ZenServer     = require "./zen"
 
+
+
 module.exports =
   run: ->
-    zen = new ZenServer port = 8000
+    zen = new ZenServer port = global.ZEN.port
 
-    require("../www/index") zen
-    require("../api/index") zen
+    for context in ["api", "www"]
+      for endpoint in global.ZEN[context] or []
+        require("../../../#{context}/#{endpoint}") zen
