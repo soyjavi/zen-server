@@ -1,5 +1,5 @@
 ###
-YOI
+ZENserver
 @description  Easy (but powerful) NodeJS Server
 @author       Javi Jimenez Villar <@soyjavi>
 
@@ -12,7 +12,9 @@ https         = require "https"
 url           = require "url"
 querystring   = require "querystring"
 
-page          = require "./zen.page"
+
+zenresponse   = require "./zen.response"
+zenrequest    = require "./zen.request"
 
 module.exports =
 
@@ -24,10 +26,14 @@ module.exports =
       splat : /\*([\w\d]+)/g
       escape: /[-[\]{}()+?.,\\^$|#\s]/g
 
-
     constructor: (@port = 80, @timeout = 1000) ->
       do @createEndpoints
       do @createServer
+
+      for context in ["api", "www"]
+        for endpoint in global.ZEN[context] or []
+          require("../../../#{context}/#{endpoint}") @
+
       console.log "ZENServer (#{@port}): CTRL + C to shutdown"
 
 
@@ -65,50 +71,50 @@ module.exports =
             parameters[endpoint.parameters[i]] = value for value, i in match.slice(1)
             break
 
+        response[method] = callback for method, callback of zenresponse
+
+
         if match
           console.log "< [#{request.method}] #{request.url}"
+          parameters[key] = value for key, value of url.parse(request.url, true).query
 
-          request.on "data", (chunk) -> body += chunk.toString()
-
+          request.on "data", (chunk) ->
+            body += chunk.toString()
           request.on "end", ->
             if body isnt ""
               parameters[key] = value for key, value of querystring.parse body
-
             request.parameters = parameters
-            request.required = (values = []) ->
-              success = true
-              for name in values when not @parameters[name]?
-                success = false
-                response.json message: "#{name} is required", 400
-                break
-              success
 
-            response.json = (value, code, headers) ->
-              run @, JSON.stringify(value), code, "application/json", headers
-
-            response.html = (value, code, headers) ->
-              run @, value.toString(), code, "text/html", headers
-
-            response.page = page
-
+            request.session = zenrequest.session request
+            request.required = (values = []) -> zenrequest.required values, request, response
             endpoint.callback request, response, next
 
-          parameters[key] = value for key, value of url.parse(request.url, true).query
-
         else
-          response.writeHead 200, "Content-Type": "text/play"
-          response.write "Unknown"
-          response.end()
+          response.page "404"
 
-      @instance.on 'error', (err) ->
-        console.log 'there was an error:', err.message
-      @instance.setTimeout @timeout, (callback) -> @ if @timeout
+      do @handleErrors
+
       @instance.listen @port
       @instance
 
-    run = (response, value, code = 200, type = "application/json", headers = {}) ->
-      console.log "> [#{response.statusCode}] #{value.length}"
-      response.setHeader name, headers[name] for name of headers
-      response.writeHead code, "Content-Type": type
-      response.write value
-      response.end()
+    handleErrors: ->
+      @instance.on 'error', (err) ->
+        console.log 'there was an error:', err.message
+      @instance.on "uncaughtException", (request, response, error) ->
+        response.send "error": error.message
+        console.log error.message
+        # shell "⚑", "red", "#{route.spec.method}", "/#{route.spec.path}", "ERROR: #{error.message}"
+      @instance.setTimeout @timeout, (callback) -> @ if @timeout
+
+      process.on "SIGTERM", =>
+        @instance.close()
+      process.on "SIGINT", =>
+        @instance.close()
+      process.on "exit", ->
+        console.log "▣", "ZENserver", "stopped correctly"
+      process.on "uncaughtException", (error) =>
+        console.log "⚑", "red", "ZENserver", error.message
+        process.exit()
+
+    setCORS: ->
+

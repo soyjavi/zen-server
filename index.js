@@ -8,6 +8,8 @@ var path          = require('path');
 // -- Register CoffeeScript if exits -------------------------------------------
 if(CoffeeScript.register) CoffeeScript.register();
 
+var Zen           = require('./lib/zen');
+
 // -- ZEN config file ----------------------------------------------------------
 var directory = '../../'
 var config_file = process.argv[2] === undefined ? "zen" : process.argv[2];
@@ -37,6 +39,6 @@ module.exports = {
     // Hope        : require("hope"),
     // Instance
     run         : function(callback) {
-        return require("./lib/zenserver").run();
+        return new Zen(global.ZEN.port, global.ZEN.timeout)
     }
 };
