@@ -2,11 +2,14 @@
 
 fs       = require "fs"
 mustache = require "mustache"
+path     = require "path"
+zlib     = require "zlib"
 
+CONST    = require "./zen.constants"
 
 module.exports =
 
-  # -- Common responses ----------------------------------------------------------
+  # -- Common responses ---------------------------------------------------------
   run: (body, code = 200, type = "application/json", headers = {}) ->
     headers["Content-Length"] = body.length
     @setHeader key, value for key, value of headers
@@ -31,13 +34,30 @@ module.exports =
 
   # -- JSON responses ----------------------------------------------------------
   json: (body = {}, code, headers = {}) ->
-    # CORS
-    for key, value of global.ZEN.headers
+    for key, value of global.ZEN.headers when not headers[key]
       headers[key] =  if Array.isArray(value) then value.join(",") else value
     @run JSON.stringify(body), code, "application/json", headers
 
   successful: ->
     @json message: "successful", 200
+
+  # -- STATIC files ------------------------------------------------------------
+  file: (url, maxage = 60) ->
+    if fs.existsSync(url) is true
+      mime_type = CONST.MIME[path.extname(url)?.slice(1) or "html"]
+      headers =
+        "Content-Type"  : mime_type
+        "Content-Length": fs.statSync(url).size
+        "Cache-Control" : "max-age=#{maxage.toString()}"
+      if mime_type.match(/#audio|video/)?
+        @writeHead 200, headers
+        readableStream = fs.createReadStream url
+        readableStream.pipe @
+      else
+        @run fs.readFileSync(url) , 200, mime_type, headers
+    else
+      @page "404"
+
 
 __mustache = (file) ->
   dir = "#{__dirname}/../../../www/mustache/"
