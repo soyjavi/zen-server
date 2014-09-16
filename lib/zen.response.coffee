@@ -16,7 +16,7 @@ module.exports =
     @writeHead code, "Content-Type": type
     @write body
     @end()
-    console.log "> [#{@statusCode}] #{value.length}"
+    console.log "> [#{@statusCode}] #{body.length}"
 
   redirect: (url) ->
     @writeHead 302, "Location": url
@@ -44,7 +44,7 @@ module.exports =
   # -- STATIC files ------------------------------------------------------------
   file: (url, maxage = 60) ->
     if fs.existsSync(url) is true
-      mime_type = CONST.MIME[path.extname(url)?.slice(1) or "html"]
+      mime_type = CONST.MIME[path.extname(url)?.slice(1)] or CONST.MIME.html
       headers =
         "Content-Type"  : mime_type
         "Content-Length": fs.statSync(url).size
