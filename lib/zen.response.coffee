@@ -7,7 +7,9 @@ zlib     = require "zlib"
 
 CONST    = require "./zen.constants"
 
-module.exports =
+response =
+  # -- Context variables -------------------------------------------------------
+  mustaches: {}
 
   # -- Common responses ---------------------------------------------------------
   run: (body, code = 200, type = "application/json", headers = {}) ->
@@ -58,13 +60,15 @@ module.exports =
     else
       @page "404"
 
+module.exports = response
 
-__mustache = (file) ->
+__mustache = (name) ->
   dir = "#{__dirname}/../../../www/mustache/"
-  try
-    fs.readFileSync "#{dir}#{file}.mustache", "utf8"
-  catch error
-    try
-      fs.readFileSync "#{dir}404.mustache", "utf8"
-    catch error
-      "<h1> 404 - Not found</h1>"
+  if response.mustaches[name]
+    response.mustaches[name]
+  else if fs.existsSync file = "#{dir}#{name}.mustache"
+    response.mustaches[name] = fs.readFileSync file, "utf8"
+  else if fs.existsSync file = "#{dir}404.mustache"
+    response.mustaches[name] = fs.readFileSync file, "utf8"
+  else
+    response.mustaches[name] = "<h1> 404 - Not found</h1>"
