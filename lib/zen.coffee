@@ -11,6 +11,7 @@ http          = require "http"
 https         = require "https"
 url           = require "url"
 querystring   = require "querystring"
+formidable    = require "formidable"
 
 CONST         = require "./zen.constants"
 zenresponse   = require "./zen.response"
@@ -72,15 +73,29 @@ module.exports =
 
         if match
           parameters[key] = value for key, value of url.parse(request.url, true).query
-          request.on "data", (chunk) -> body += chunk.toString()
-          request.on "end", ->
-            if body isnt ""
-              parameters[key] = value for key, value of querystring.parse body
-            request.parameters = parameters
-            request.session = zenrequest.session request
-            request.required = (values = []) -> zenrequest.required values, request, response
-            endpoint.callback request, response, next
 
+          unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
+            request.on "data", (chunk) ->
+              body += chunk.toString()
+              if body.length > 1e6
+                  body = ""
+                  response.run "", 413, "text/plain"
+                  request.connection.destroy()
+
+            request.on "end", ->
+              if body isnt ""
+                parameters[key] = value for key, value of querystring.parse body
+              request.parameters = parameters
+              request.session = zenrequest.session request
+              request.required = (values = []) -> zenrequest.required values, request, response
+              endpoint.callback request, response, next
+          else
+            form = new formidable.IncomingForm
+              multiples     : true
+              keepExtensions: true
+            form.parse request, (error, parameters, files) ->
+              request.parameters = zenrequest.multipart error, parameters, files
+              endpoint.callback request, response, next
         else
           response.page "404"
 

@@ -1,6 +1,6 @@
 {
   "name": "zenserver",
-  "version": "0.09.16",
+  "version": "0.9.16",
   "description": "a lean and mean http router for node.js",
   "homepage": "http://twitter.com/soyjavi",
   "keywords": [
@@ -14,10 +14,11 @@
     "email": "javi@tapquo.com"
   },
   "dependencies": {
-    "coffee-script" : "*",
-    "colors"        : "*",
-    "js-yaml"       : "*",
-    "mustache"      : "*"
+    "coffee-script": "*",
+    "colors": "*",
+    "formidable": "*",
+    "js-yaml": "*",
+    "mustache": "*"
   },
   "main": "./index.js",
   "engines": {

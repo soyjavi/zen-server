@@ -8,6 +8,9 @@ module.exports =
     splat : /\*([\w\d]+)/g
     escape: /[-[\]{}()+?.,\\^$|#\s]/g
 
+  REGEXP:
+    MULTIPART: /multipart\/form-data/i
+
   MIME:
     aiff: "audio/x-aiff"
     arj: "application/x-arj-compressed"
@@ -67,6 +70,7 @@ module.exports =
     movie: "video/x-sgi-movie"
     mp3: "audio/mpeg3"
     mp4: "video/mp4"
+    m4v: "video/mp4"
     mpg: "video/mpeg"
     mpga: "audio/mpeg"
     ms: "application/x-troff-ms"
