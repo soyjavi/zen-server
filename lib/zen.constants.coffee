@@ -149,3 +149,28 @@ module.exports =
     xwd: "image/x-xwindowdump"
     xyz: "chemical/x-pdb"
     zip: "application/zip"
+
+  STATUS:
+    # 2xx Successful
+    200: "Ok"
+    201: "Created"
+    202: "Accepted"
+    204: "noContent"
+    # 4xx Client Error
+    400: "badRequest"
+    401: "unauthorized"
+    402: "paymentRequired"
+    403: "forbidden"
+    404: "notFound"
+    405: "methodNotAllowed"
+    406: "notAcceptable"
+    407: "proxyAuthenticationRequired"
+    408: "requestTimeout"
+    409: "conflict"
+    # 5xx Server Error
+    500: "internalServerError"
+    501: "notImplemented"
+    502: "badGateway"
+    503: "serviceUnavailable"
+    504: "gatewayTimeout"
+    505: "HTTPVersionNotSupported"

@@ -40,9 +40,6 @@ response =
       headers[key] =  if Array.isArray(value) then value.join(",") else value
     @run JSON.stringify(body), code, "application/json", headers
 
-  successful: ->
-    @json message: "successful", 200
-
   # -- STATIC files ------------------------------------------------------------
   file: (url, maxage = 60) ->
     if fs.existsSync(url) is true
@@ -51,7 +48,7 @@ response =
         "Content-Type"  : mime_type
         "Content-Length": fs.statSync(url).size
         "Cache-Control" : "max-age=#{maxage.toString()}"
-      if mime_type.match(/#audio|video/)?
+      if mime_type.match(/audio|video/)?
         @writeHead 200, headers
         readableStream = fs.createReadStream url
         readableStream.pipe @
@@ -59,6 +56,9 @@ response =
         @run fs.readFileSync(url) , 200, mime_type, headers
     else
       @page "404"
+
+for code, status of CONST.STATUS
+  do (status, code) -> response[status] = -> @json message: status, code
 
 module.exports = response
 

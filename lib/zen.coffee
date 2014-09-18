@@ -72,23 +72,26 @@ module.exports =
             break
 
         if match
-          parameters[key] = value for key, value of url.parse(request.url, true).query
+          # Middleware
+          request.session = zenrequest.session request
+          request.required = (values = []) -> zenrequest.required values, request, response
 
+          console.log "< [#{request.method}] #{match} #{request.session?}"
+
+          parameters[key] = value for key, value of url.parse(request.url, true).query
           unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
             request.on "data", (chunk) ->
               body += chunk.toString()
               if body.length > 1e6
-                  body = ""
-                  response.run "", 413, "text/plain"
-                  request.connection.destroy()
-
+                body = ""
+                response.run "", 413, "text/plain"
+                request.connection.destroy()
             request.on "end", ->
               if body isnt ""
                 parameters[key] = value for key, value of querystring.parse body
               request.parameters = parameters
-              request.session = zenrequest.session request
-              request.required = (values = []) -> zenrequest.required values, request, response
               endpoint.callback request, response, next
+
           else
             form = new formidable.IncomingForm
               multiples     : true

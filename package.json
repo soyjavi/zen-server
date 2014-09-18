@@ -1,6 +1,6 @@
 {
   "name": "zenserver",
-  "version": "0.9.16",
+  "version": "0.9.18",
   "description": "a lean and mean http router for node.js",
   "homepage": "http://twitter.com/soyjavi",
   "keywords": [

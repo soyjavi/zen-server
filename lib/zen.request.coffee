@@ -3,14 +3,13 @@
 module.exports =
 
   session: (request)->
-    return undefined
     session = undefined
-    key = global.ZEN.session.authorization
-    session = request.headers[key] if request.headers[key]?
+    key = global.ZEN.session?.authorization
+    session = request.headers[key] if key? and request.headers[key]?
     request.headers.cookie?.split(";").forEach (cookie) ->
       parts = cookie.split("=")
       key = parts[0].trim()
-      session = (parts[1] or "" ).trim() if key is global.ZEN.session.cookie
+      session = (parts[1] or "" ).trim() if key is global.ZEN.session?.cookie
     session
 
   required: (values, request, response) ->
