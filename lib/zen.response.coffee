@@ -1,5 +1,6 @@
 "use strict"
 
+colors   = require "colors"
 fs       = require "fs"
 mustache = require "mustache"
 path     = require "path"
@@ -18,7 +19,10 @@ response =
     @writeHead code, "Content-Type": type
     @write body
     @end()
-    console.log "> [#{@statusCode}] #{body.length}"
+
+    gap = new Date() - @request.at
+    color = if code < 300 then "green" else "red"
+    console.log " ⇢ "[color], code.toString().grey, "#{gap}ms", type, body.length
 
   redirect: (url) ->
     @writeHead 302, "Location": url
@@ -29,10 +33,10 @@ response =
   html: (value, code, headers = {}) ->
     @run value.toString(), code, "text/html", headers
 
-  page: (file, data, partials = []) ->
+  page: (file, data, partials = [], code) ->
     files = {}
     files[partial] = __mustache partial for partial in partials or []
-    @html mustache.to_html __mustache(file), data, files
+    @html mustache.to_html(__mustache(file), data, files), code
 
   # -- JSON responses ----------------------------------------------------------
   json: (body = {}, code, headers = {}) ->
@@ -55,7 +59,7 @@ response =
       else
         @run fs.readFileSync(url) , 200, mime_type, headers
     else
-      @page "404"
+      @page "404", undefined, undefined, 404
 
 for code, status of CONST.STATUS
   do (status, code) -> response[status] = -> @json message: status, code

@@ -13,22 +13,27 @@ url           = require "url"
 querystring   = require "querystring"
 formidable    = require "formidable"
 
+ZEN           = require "./zen.config"
 CONST         = require "./zen.constants"
-zenresponse   = require "./zen.response"
 zenrequest    = require "./zen.request"
+zenresponse   = require "./zen.response"
 
 module.exports =
 
   class ZenServer
 
-    constructor: (@port = 80, @timeout = 1000) ->
+    constructor: ->
       do @createEndpoints
       do @createServer
       # -- Read resources ------------------------------------------------------
+      global.ZEN.br()
+      console.log " ▣ ENDPOINTS"
       for context in ["api", "www"]
         for endpoint in global.ZEN[context] or []
           require("../../../#{context}/#{endpoint}") @
       # -- Read static files ---------------------------------------------------
+      global.ZEN.br()
+      console.log " ▣ STATICS"
       for policy in global.ZEN.statics or []
         do (policy) =>
           @get policy.url + "/:resource", (request, response, next) ->
@@ -36,14 +41,16 @@ module.exports =
             folder += "/#{request.parameters.folder}" if request.parameters.folder
             file = request.parameters.resource
             response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
-
-      console.log "ZENServer (#{@port}): CTRL + C to shutdown"
+      global.ZEN.br()
+      console.log " CTRL + C to shutdown".grey
+      global.ZEN.br()
 
     createEndpoints: ->
       @methods = {}
       CONST.HTTP_METHODS.forEach (method) =>
         @methods[method] = []
         @[method.toLowerCase()] = (pattern, callback) ->
+          console.log " ✓".green, "[#{method.substr(0,3)}]".grey, "#{pattern}"
           parameters = []
           for name, regexp of CONST.URL_MATCH
             parameters.push(match[1]) while (match = regexp.exec(pattern)) isnt null
@@ -60,6 +67,7 @@ module.exports =
 
     createServer: ->
       @server = http.createServer (request, response, next) =>
+        response.request = url: request.url, at : new Date()
         response[method] = callback for method, callback of zenresponse
 
         body = ""
@@ -75,8 +83,8 @@ module.exports =
           # Middleware
           request.session = zenrequest.session request
           request.required = (values = []) -> zenrequest.required values, request, response
-
-          console.log "< [#{request.method}] #{match} #{request.session?}"
+          # "⇐" else "⇠"
+          console.log " ⇠ ".green, request.method.grey, url.parse(request.url).pathname
 
           parameters[key] = value for key, value of url.parse(request.url, true).query
           unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
@@ -91,7 +99,6 @@ module.exports =
                 parameters[key] = value for key, value of querystring.parse body
               request.parameters = parameters
               endpoint.callback request, response, next
-
           else
             form = new formidable.IncomingForm
               multiples     : true
@@ -100,10 +107,11 @@ module.exports =
               request.parameters = zenrequest.multipart error, parameters, files
               endpoint.callback request, response, next
         else
-          response.page "404"
+          console.log " ⇠  #{request.method} #{request.url}".grey
+          response.page "404", undefined, undefined, 404
 
       do @handleErrors
-      @server.listen @port
+      @server.listen ZEN.port
       @server
 
 
@@ -112,16 +120,15 @@ module.exports =
         console.log 'there was an error:', err.message
       @server.on "uncaughtException", (request, response, error) ->
         response.send "error": error.message
-        console.log error.message
-        # shell "⚑", "red", "#{route.spec.method}", "/#{route.spec.path}", "ERROR: #{error.message}"
-      @server.setTimeout @timeout, (callback) -> @ if @timeout
+        console.log " ⚑".red, request.url, "ERROR: #{error.message}"
+      @server.setTimeout ZEN.timeout, (callback) -> @ if ZEN.timeout
 
       process.on "SIGTERM", =>
         @server.close()
       process.on "SIGINT", =>
         @server.close()
       process.on "exit", =>
-        console.log "▣", "ZENserver", "stopped correctly"
+        console.log "\n ▣", "ZENserver", "stopped correctly"
       process.on "uncaughtException", (error) =>
-        console.log "⚑", "red", "ZENserver", error.message
+        console.log " ⚑".red, "ZENserver", error.message
         process.exit()

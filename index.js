@@ -1,29 +1,10 @@
 "use strict";
 
 var CoffeeScript  = require('coffee-script');
-var fs            = require("fs");
-var yaml          = require('js-yaml');
-var path          = require('path');
-
 // -- Register CoffeeScript if exits -------------------------------------------
 if(CoffeeScript.register) CoffeeScript.register();
 
 var Zen           = require('./lib/zen');
-
-// -- ZEN config file ----------------------------------------------------------
-var directory = '../../'
-var config_file = process.argv[2] === undefined ? "zen" : process.argv[2];
-var config_path = path.join(__dirname, directory + config_file + ".yml");
-global.ZEN = yaml.safeLoad(fs.readFileSync(config_path, 'utf8'));
-
-// -- ZEN environment (if exists) ----------------------------------------------
-if (global.ZEN.environment) {
-    var environment_name = process.argv[3] === undefined ? global.ZEN.environment : process.argv[3];
-    var environment_path = path.join(__dirname, directory + '/environment/' + environment_name + ".yml");
-    global.ZEN.environment = yaml.safeLoad(fs.readFileSync(environment_path, 'utf8'));
-}
-
-if (global.ZEN.environment.timezone) process.env.TZ = global.ZEN.environment.timezone;
 
 module.exports = {
     // Crawler     : require("./lib/helpers/crawler"),
@@ -38,7 +19,7 @@ module.exports = {
     // Mongoose    : require("mongoose"),
     // Hope        : require("hope"),
     // Instance
-    run         : function(callback) {
-        return new Zen(global.ZEN.port, global.ZEN.timeout)
+    start         : function() {
+        return new Zen()
     }
 };
