@@ -22,12 +22,14 @@ response =
 
     gap = new Date() - @request.at
     color = if code < 300 then "green" else "red"
-    console.log " ⇢ "[color], code.toString().grey, "#{gap}ms", type, body.length
+    arrow = if @request.session then "⇥" else "⇢"
+    console.log " #{arrow} "[color], code.toString().grey, "#{gap}ms", type, body.length
 
   redirect: (url) ->
     @writeHead 302, "Location": url
     @end()
-    console.log ">> [#{@statusCode}] #{url}"
+    gap = new Date() - @request.at
+    console.log " ⇢ ".blue, "302".toString().grey, "#{gap}ms", url
 
   # -- HTML responses ----------------------------------------------------------
   html: (value, code, headers = {}) ->
@@ -76,3 +78,6 @@ __mustache = (name) ->
     response.mustaches[name] = fs.readFileSync file, "utf8"
   else
     response.mustaches[name] = "<h1> 404 - Not found</h1>"
+
+__output = (response, color) ->
+  console.log " ⇢ "[color], code.toString().grey, "#{gap}ms", type, body.length

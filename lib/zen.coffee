@@ -81,10 +81,10 @@ module.exports =
 
         if match
           # Middleware
-          request.session = zenrequest.session request
+          request.session = response.request.session  = zenrequest.session request
           request.required = (values = []) -> zenrequest.required values, request, response
-          # "⇐" else "⇠"
-          console.log " ⇠ ".green, request.method.grey, url.parse(request.url).pathname
+          arrow = if request.session then "⇤" else "⇠"
+          console.log " #{arrow} ".green, request.method.grey, url.parse(request.url).pathname
 
           parameters[key] = value for key, value of url.parse(request.url, true).query
           unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
