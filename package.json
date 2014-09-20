@@ -1,6 +1,6 @@
 {
   "name": "zenserver",
-  "version": "0.9.19",
+  "version": "0.9.20",
   "description": "a lean and mean http router for node.js",
   "homepage": "http://twitter.com/soyjavi",
   "keywords": [
@@ -14,14 +14,21 @@
     "email": "javi@tapquo.com"
   },
   "dependencies": {
-    "coffee-script": "*",
-    "colors": "*",
-    "formidable": "*",
-    "js-yaml": "*",
-    "mustache": "*"
+    "coffee-script" : "*",
+    "colors"        : "*",
+    "formidable"    : "*",
+    "hope"          : "*",
+    "js-yaml"       : "*",
+    "mongoose"      : "*",
+    "mustache"      : "*",
+    "redis"         : "*"
   },
   "main": "./index.js",
   "engines": {
     "node": "*"
-  }
+  },
+  "readme": "zen-server\n==========\n\na lean and mean http router for node.js\n",
+  "readmeFilename": "README.md",
+  "_id": "zenserver@0.9.19",
+  "_from": "zenserver@*"
 }

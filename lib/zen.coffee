@@ -7,16 +7,21 @@ ZENserver
 ###
 "use strict"
 
+formidable    = require "formidable"
+Hope          = require "hope"
 http          = require "http"
 https         = require "https"
-url           = require "url"
 querystring   = require "querystring"
-formidable    = require "formidable"
+url           = require "url"
 
 ZEN           = require "./zen.config"
 CONST         = require "./zen.constants"
 zenrequest    = require "./zen.request"
 zenresponse   = require "./zen.response"
+
+# appnima       = require "./services/appnima"
+mongo         = require "./services/mongo"
+redis         = require "./services/redis"
 
 module.exports =
 
@@ -41,9 +46,18 @@ module.exports =
             folder += "/#{request.parameters.folder}" if request.parameters.folder
             file = request.parameters.resource
             response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
-      global.ZEN.br()
-      console.log " CTRL + C to shutdown".grey
-      global.ZEN.br()
+      # -- Service Connections -------------------------------------------------
+      tasks = []
+      for connection in (global.ZEN.mongo or [])
+        tasks.push do (connection) -> -> mongo.open connection
+      if global.ZEN.redis?
+        tasks.push => redis.open global.ZEN.redis
+      if tasks.length > 0
+        Hope.shield(tasks).then (error, value) =>
+          process.exit() if error
+          global.ZEN.br()
+          console.log " CTRL + C to shutdown".grey
+          global.ZEN.br()
 
     createEndpoints: ->
       @methods = {}

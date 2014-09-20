@@ -27,8 +27,8 @@ module.exports = do ->
   # -- ZEN output ------------------------------------------------------------
   process.stdout.write "\u001B[2J\u001B[0;0f"
   console.log "========================================================================"
-  console.log " ZENserver v#{node_package.version} - Easy (but powerful) NodeJS server".rainbow
-  console.log " https://github.com/soyjavi/zen-server"
+  console.log " ZENserver v#{node_package.version}", "- Easy (but powerful) NodeJS server".grey
+  console.log " https://github.com/soyjavi/zen-server".grey
   console.log "========================================================================"
   console.log " ▣ ENVIRONMENT"
   console.log " ✓".green, "Environment".grey,  ZEN.type
