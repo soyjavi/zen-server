@@ -19,7 +19,7 @@ CONST         = require "./zen.constants"
 zenrequest    = require "./zen.request"
 zenresponse   = require "./zen.response"
 
-# appnima       = require "./services/appnima"
+appnima       = require "./services/appnima"
 mongo         = require "./services/mongo"
 redis         = require "./services/redis"
 
@@ -31,14 +31,12 @@ module.exports =
       do @createEndpoints
       do @createServer
       # -- Read resources ------------------------------------------------------
-      global.ZEN.br()
-      console.log " ▣ ENDPOINTS"
+      global.ZEN.br "ENDPOINTS"
       for context in ["api", "www"]
         for endpoint in global.ZEN[context] or []
           require("../../../#{context}/#{endpoint}") @
       # -- Read static files ---------------------------------------------------
-      global.ZEN.br()
-      console.log " ▣ STATICS"
+      global.ZEN.br "STATICS"
       for policy in global.ZEN.statics or []
         do (policy) =>
           @get policy.url + "/:resource", (request, response, next) ->
@@ -52,11 +50,12 @@ module.exports =
         tasks.push do (connection) -> -> mongo.open connection
       if global.ZEN.redis?
         tasks.push => redis.open global.ZEN.redis
+      if global.ZEN.appnima
+        tasks.push => appnima.init global.ZEN.appnima
       if tasks.length > 0
         Hope.shield(tasks).then (error, value) =>
           process.exit() if error
-          global.ZEN.br()
-          console.log " CTRL + C to shutdown".grey
+          global.ZEN.br "CTRL + C to shutdown"
           global.ZEN.br()
 
     createEndpoints: ->

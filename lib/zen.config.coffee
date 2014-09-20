@@ -35,7 +35,8 @@ module.exports = do ->
   console.log " ✓".green, "Address".grey, "#{ZEN.host}:#{ZEN.port}"
   console.log " ✓".green, "Timezone".grey, ZEN.timezone
 
-  ZEN.br = ->
+  ZEN.br = (heading) ->
     console.log "------------------------------------------------------------------------".grey
+    console.log " ▣ #{heading}" if heading
 
   global.ZEN = ZEN
