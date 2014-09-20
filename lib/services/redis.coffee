@@ -1,7 +1,7 @@
 ###
-YOI
+ZENserver
 @description  Easy (but powerful) NodeJS Server
-@author       Javi Jimenez Villar <javi@tapquo.org> || @soyjavi
+@author       Javi Jimenez Villar <@soyjavi>
 
 @namespace    lib/services/redis
 ###
@@ -13,8 +13,7 @@ Hope  = require "hope"
 Redis =
 
   open: (connection) ->
-    global.ZEN.br()
-    console.log " ▣ REDIS"
+    global.ZEN.br "REDIS"
     @host = connection.host
     @port = connection.port
 

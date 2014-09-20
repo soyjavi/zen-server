@@ -1,7 +1,7 @@
 ###
-YOI
+ZENserver
 @description  Easy (but powerful) NodeJS Server
-@author       Javi Jimenez Villar <javi@tapquo.org> || @soyjavi
+@author       Javi Jimenez Villar <@soyjavi>
 
 @namespace    lib/services/mongo
 ###
@@ -15,8 +15,7 @@ module.exports =
 
   open: (connection = {}) ->
     if Object.keys(@connections).length is 0
-      global.ZEN.br()
-      console.log " ▣ MONGODB"
+      global.ZEN.br "MONGODB"
 
     promise = new Hope.Promise()
     url = connection.host + ":" + connection.port + "/" + connection.db
