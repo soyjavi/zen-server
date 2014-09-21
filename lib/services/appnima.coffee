@@ -17,11 +17,10 @@ Appnima =
   key     : ""
 
   init: (data) ->
-    global.ZEN.br "APPNIMA"
     promise = new Hope.Promise()
     if data.key? then @key = data.key
     if data.host? then @host = data.host
-    console.log " ✓".green, "connected to".grey, "#{@host}".underline.blue
+    console.log " ✓".green, "Appnima", "listening at".grey, "#{@host}".underline.blue
     promise.done null, true
     promise
 

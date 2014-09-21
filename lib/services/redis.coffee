@@ -13,7 +13,6 @@ Hope  = require "hope"
 Redis =
 
   open: (connection) ->
-    global.ZEN.br "REDIS"
     @host = connection.host
     @port = connection.port
 
@@ -24,7 +23,7 @@ Redis =
       console.log " ⚑".red, "Error connection:".grey, error.red
       promise.done error, null
     @client.on "connect", =>
-      console.log " ✓".green, "listening at".grey, "#{@host}:#{@port}".underline.blue
+      console.log " ✓".green, "Redis", "listening at".grey, "#{@host}:#{@port}".underline.blue
       promise.done null, true
     promise
 

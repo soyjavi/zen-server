@@ -14,9 +14,6 @@ module.exports =
   connections: {}
 
   open: (connection = {}) ->
-    if Object.keys(@connections).length is 0
-      global.ZEN.br "MONGODB"
-
     promise = new Hope.Promise()
     url = connection.host + ":" + connection.port + "/" + connection.db
     if connection.user and connection.password
@@ -29,7 +26,7 @@ module.exports =
       promise.done true, null
       process.exit()
     @connections[connection.name].on "connected", (error) ->
-      console.log " ✓".green, connection.name, "listening at".grey, "#{connection.host}:#{connection.port}/#{connection.db}".underline.blue
+      console.log " ✓".green, "MongoDB:#{connection.name}", "listening at".grey, "#{connection.host}:#{connection.port}/#{connection.db}".underline.blue
       promise.done null, true
     promise
 

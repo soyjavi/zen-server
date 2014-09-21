@@ -45,18 +45,20 @@ module.exports =
             file = request.parameters.resource
             response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
       # -- Service Connections -------------------------------------------------
-      tasks = []
-      for connection in (global.ZEN.mongo or [])
-        tasks.push do (connection) -> -> mongo.open connection
-      if global.ZEN.redis?
-        tasks.push => redis.open global.ZEN.redis
-      if global.ZEN.appnima
-        tasks.push => appnima.init global.ZEN.appnima
-      if tasks.length > 0
-        Hope.shield(tasks).then (error, value) =>
-          process.exit() if error
-          global.ZEN.br "CTRL + C to shutdown"
-          global.ZEN.br()
+      if global.ZEN.mongo? or global.ZEN.redis? or global.ZEN.appnima
+        global.ZEN.br "SERVICES"
+        tasks = []
+        for connection in (global.ZEN.mongo or [])
+          tasks.push do (connection) -> -> mongo.open connection
+        if global.ZEN.redis?
+          tasks.push => redis.open global.ZEN.redis
+        if global.ZEN.appnima
+          tasks.push => appnima.init global.ZEN.appnima
+        if tasks.length > 0
+          Hope.shield(tasks).then (error, value) =>
+            process.exit() if error
+            global.ZEN.br "CTRL + C to shutdown"
+            global.ZEN.br()
 
     createEndpoints: ->
       @methods = {}
