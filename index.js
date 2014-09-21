@@ -12,12 +12,12 @@ module.exports = {
     // Deploy      : require("./lib/helpers/deploy"),
     // Model       : require("./lib/helpers/model"),
     // Services
-    // Mongo       : require("./lib/services/mongo"),
-    // Redis       : require("./lib/services/redis"),
-    // Appnima     : require("./lib/services/appnima"),
+    Mongo       : require("./lib/services/mongo"),
+    Redis       : require("./lib/services/redis"),
+    Appnima     : require("./lib/services/appnima"),
     // Facade
-    // Mongoose    : require("mongoose"),
-    // Hope        : require("hope"),
+    Mongoose    : require("mongoose"),
+    Hope        : require("hope"),
     // Instance
     start         : function() {
         return new Zen()
