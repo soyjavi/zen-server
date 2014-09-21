@@ -1,6 +1,6 @@
 {
   "name": "zenserver",
-  "version": "0.9.21",
+  "version": "0.9.21b",
   "description": "a lean and mean http router for node.js",
   "homepage": "http://twitter.com/soyjavi",
   "keywords": [
@@ -21,7 +21,8 @@
     "js-yaml"       : "*",
     "mongoose"      : "*",
     "mustache"      : "*",
-    "redis"         : "*"
+    "redis"         : "*",
+    "request"       : "*"
   },
   "main": "./index.js",
   "engines": {
