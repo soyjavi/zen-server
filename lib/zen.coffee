@@ -82,7 +82,7 @@ module.exports =
 
     createServer: ->
       @server = http.createServer (request, response, next) =>
-        response.request = url: request.url, at : new Date()
+        response.request = url: request.url, method: request.method, at: new Date()
         response[method] = callback for method, callback of zenresponse
 
         body = ""
@@ -98,9 +98,6 @@ module.exports =
           # Middleware
           request.session = response.request.session  = zenrequest.session request
           request.required = (values = []) -> zenrequest.required values, request, response
-          arrow = if request.session then "⇤" else "⇠"
-          console.log " #{arrow} ".green, request.method.grey, url.parse(request.url).pathname
-
           parameters[key] = value for key, value of url.parse(request.url, true).query
           unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
             request.on "data", (chunk) ->
@@ -122,7 +119,6 @@ module.exports =
               request.parameters = zenrequest.multipart error, parameters, files
               endpoint.callback request, response, next
         else
-          console.log " ⇠  #{request.method} #{request.url}".grey
           response.page "404", undefined, undefined, 404
 
       do @handleErrors

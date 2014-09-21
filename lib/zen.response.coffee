@@ -4,32 +4,26 @@ colors   = require "colors"
 fs       = require "fs"
 mustache = require "mustache"
 path     = require "path"
+url      = require "url"
 zlib     = require "zlib"
 
 CONST    = require "./zen.constants"
 
 response =
-  # -- Context variables -------------------------------------------------------
-  mustaches: {}
 
   # -- Common responses ---------------------------------------------------------
   run: (body, code = 200, type = "application/json", headers = {}) ->
-    headers["Content-Length"] = body.length
+    headers["Content-Length"] = body?.length
     @setHeader key, value for key, value of headers
     @writeHead code, "Content-Type": type
     @write body
     @end()
-
-    gap = new Date() - @request.at
-    color = if code < 300 then "green" else "red"
-    arrow = if @request.session then "⇥" else "⇢"
-    console.log " #{arrow} "[color], code.toString().grey, "#{gap}ms", type, body.length
+    __output @request, @statusCode, type, body
 
   redirect: (url) ->
     @writeHead 302, "Location": url
     @end()
-    gap = new Date() - @request.at
-    console.log " ⇢ ".blue, "302".toString().grey, "#{gap}ms", url
+    __output @request, 302
 
   # -- HTML responses ----------------------------------------------------------
   html: (value, code, headers = {}) ->
@@ -58,8 +52,9 @@ response =
         @writeHead 200, headers
         readableStream = fs.createReadStream url
         readableStream.pipe @
+        __output @request, 200, mime_type
       else
-        @run fs.readFileSync(url) , 200, mime_type, headers
+        @run fs.readFileSync(url), 200, mime_type, headers
     else
       @page "404", undefined, undefined, 404
 
@@ -68,16 +63,33 @@ for code, status of CONST.STATUS
 
 module.exports = response
 
+__cachedMustache = {}
+
 __mustache = (name) ->
   dir = "#{__dirname}/../../../www/mustache/"
-  if response.mustaches[name]
-    response.mustaches[name]
+  if __cachedMustache[name]
+    __cachedMustache[name]
   else if fs.existsSync file = "#{dir}#{name}.mustache"
-    response.mustaches[name] = fs.readFileSync file, "utf8"
+    __cachedMustache[name] = fs.readFileSync file, "utf8"
   else if fs.existsSync file = "#{dir}404.mustache"
-    response.mustaches[name] = fs.readFileSync file, "utf8"
+    __cachedMustache[name] = fs.readFileSync file, "utf8"
   else
-    response.mustaches[name] = "<h1> 404 - Not found</h1>"
+    __cachedMustache[name] = "<h1> 404 - Not found</h1>"
 
-__output = (response, color) ->
-  console.log " ⇢ "[color], code.toString().grey, "#{gap}ms", type, body.length
+__output = (request, code, type = "", body = "") ->
+  gap = new Date() - request.at
+  color = "red"
+  if (code >= 200 and code < 300)
+    color = "green"
+  else if (code >= 300 and code < 400)
+    color = "blue"
+
+  if request.session?
+    _in = "⇤"
+    _out = "⇥"
+  else
+    _in = "⇠"
+    _out = "⇢"
+
+  console.log " #{_in} ".green, request.method.grey, url.parse(request.url).pathname,
+    "#{_out}  #{code}"[color], "#{gap}ms", "#{type} #{body?.length}".grey
