@@ -9,7 +9,7 @@ module.exports =
     request.headers.cookie?.split(";").forEach (cookie) ->
       parts = cookie.split("=")
       key = parts[0].trim()
-      session = (parts[1] or "" ).trim() if key is global.ZEN.session?.cookie
+      session = (parts[1] or "").trim() if key is global.ZEN.session?.cookie
     session
 
   required: (values, request, response) ->

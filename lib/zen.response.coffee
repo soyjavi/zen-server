@@ -11,6 +11,13 @@ CONST    = require "./zen.constants"
 
 response =
 
+  session: (value) ->
+    @setHeader "Set-Cookie", __cookie value
+
+  logout: ->
+    @setHeader "Set-Cookie", __cookie()
+    delete @request.session
+
   # -- Common responses ---------------------------------------------------------
   run: (body, code = 200, type = "application/json", headers = {}) ->
     headers["Content-Length"] = body?.length
@@ -29,7 +36,7 @@ response =
   html: (value, code, headers = {}) ->
     @run value.toString(), code, "text/html", headers
 
-  page: (file, data, partials = [], code) ->
+  page: (file, data, partials = [], code, headers = {}) ->
     files = {}
     files[partial] = __mustache partial for partial in partials or []
     @html mustache.to_html(__mustache(file), data, files), code
@@ -64,6 +71,16 @@ for code, status of CONST.STATUS
 module.exports = response
 
 __cachedMustache = {}
+
+__cookie = (value) ->
+  key = global.ZEN.session.cookie
+  if value
+    today = new Date()
+    expires = new Date today.getTime() + (global.ZEN.session.expire * 1000)
+  else
+    expires = new Date(-1).toUTCString()
+  "#{key}=#{value}; Expires=#{expires}"
+
 
 __mustache = (name) ->
   dir = "#{__dirname}/../../../www/mustache/"
