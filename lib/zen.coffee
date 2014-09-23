@@ -53,7 +53,7 @@ module.exports =
         if global.ZEN.redis?
           tasks.push => redis.open global.ZEN.redis
         if global.ZEN.appnima
-          tasks.push => appnima.init global.ZEN.appnima
+          tasks.push => appnima.open global.ZEN.appnima
         if tasks.length > 0
           Hope.shield(tasks).then (error, value) =>
             process.exit() if error

@@ -16,58 +16,51 @@ Appnima =
   host    : "http://api.appnima.com/"
   key     : ""
 
-  init: (data) ->
+  open: (connection) ->
     promise = new Hope.Promise()
-    if data.key? then @key = data.key
-    if data.host? then @host = data.host
+    if connection.key? then @key = connection.key
+    if connection.host? then @host = connection.host
     console.log " ✓".green, "Appnima", "listening at".grey, "#{@host}".underline.blue
     promise.done null, true
     promise
 
-  subscribe: (mail, callback) ->
-    @_proxy "POST", "user/subscription", {mail: mail}, {Authorization: "basic #{@key}"}, callback
-
-  signup: (user_agent, mail, password, username, name) ->
-    promise = new Hope.Promise()
-    @headers = Authorization: "basic #{@key}"
-    @headers["user-agent"] = user_agent if user_agent
+  signup: (agent, mail, password, username, name) ->
+    headers = Authorization: "basic #{@key}"
+    headers["user-agent"] = agent if agent
     parameters =
       mail      : mail
       password  : password
       username  : username
       name      : name
-    @_proxy("POST", "user/signup", parameters, @headers).then (error, signup) ->
-      promise.done error, signup
-    promise
+    @_proxy "POST", "user/signup", parameters, headers
 
 
-  login: (user_agent, mail, password, username, callback) ->
+  login: (agent, mail, password, username) ->
     headers = Authorization: "basic #{@key}"
-    headers["user-agent"] = user_agent if user_agent
+    headers["user-agent"] = agent if agent
     parameters =
       mail      : mail
       password  : password
       username  : username
-    @_proxy "POST", "user/login", parameters, headers, callback
+    @_proxy "POST", "user/login", parameters, headers
 
 
-  refreshToken: (user_agent, refresh_token, callback) ->
+  refreshToken: (agent, refresh_token) ->
     headers = Authorization: "basic #{@key}"
-    headers["user-agent"] = user_agent if user_agent
+    headers["user-agent"] = agent if agent
     parameters =
       refresh_token : refresh_token
       grant_type    : "refresh_token"
-    @_proxy "POST", "user/token", parameters, headers, callback
+    @_proxy "POST", "user/token", parameters, headers
 
 
-  api: (user_agent, method, url, token, parameters, callback) ->
+  api: (agent, method, url, token, parameters) ->
     headers = {}
-    headers["user-agent"] = user_agent if user_agent
-    if token?
-      headers.authorization = "bearer #{token}"
-    @_proxy method, url, parameters, headers, callback
+    headers["user-agent"] = agent if agent
+    headers.authorization = "bearer #{token}" if token?
+    @_proxy method, url, parameters, headers
 
-  _proxy: (method, url, parameters = {}, headers = {}, callback) ->
+  _proxy: (method, url, parameters = {}, headers = {}) ->
     promise = new Hope.Promise()
     method = method.toUpperCase()
     options =
@@ -79,12 +72,11 @@ Appnima =
     else
       options.form = parameters
     request options, (error, response, body) ->
-      result = JSON.parse body if body?
+      value = JSON.parse body if body?
       if response.statusCode >= 400
-        error = code: response.statusCode, message: result.message
-        result = null
-      promise.done error, result
-      callback.call callback, error, result if callback?
+        error = code: response.statusCode, message: value.message
+        value = null
+      promise.done error, value
     promise
 
 module.exports = Appnima
