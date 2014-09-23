@@ -15,7 +15,7 @@ response =
     @setHeader "Set-Cookie", __cookie value
 
   logout: ->
-    @setHeader "Set-Cookie", __cookie()
+    @setHeader "Set-Cookie", __cookie null
     delete @request.session
 
   # -- Common responses ---------------------------------------------------------
@@ -74,12 +74,15 @@ __cachedMustache = {}
 
 __cookie = (value) ->
   key = global.ZEN.session.cookie
-  if value
+  if value?
     today = new Date()
     expires = new Date today.getTime() + (global.ZEN.session.expire * 1000)
   else
     expires = new Date(-1).toUTCString()
-  "#{key}=#{value}; Expires=#{expires}"
+  cookie = "#{key}=#{value}; Expires=#{expires}"
+  cookie += "; Path=#{global.ZEN.session.path or "/"}"
+  cookie += "; Domain=#{global.ZEN.session.domain or ""}"
+  cookie
 
 
 __mustache = (name) ->
