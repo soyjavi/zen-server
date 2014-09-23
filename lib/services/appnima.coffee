@@ -24,24 +24,15 @@ Appnima =
     promise.done null, true
     promise
 
-  signup: (agent, mail, password, username, name) ->
+  signup: (parameters, agent) ->
     headers = Authorization: "basic #{@key}"
     headers["user-agent"] = agent if agent
-    parameters =
-      mail      : mail
-      password  : password
-      username  : username
-      name      : name
     @_proxy "POST", "user/signup", parameters, headers
 
 
-  login: (agent, mail, password, username) ->
+  login: (parameters, agent) ->
     headers = Authorization: "basic #{@key}"
     headers["user-agent"] = agent if agent
-    parameters =
-      mail      : mail
-      password  : password
-      username  : username
     @_proxy "POST", "user/login", parameters, headers
 
 
