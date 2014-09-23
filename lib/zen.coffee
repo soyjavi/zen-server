@@ -64,7 +64,7 @@ module.exports =
             parameters: parameters
 
     createServer: ->
-      @server = http.createServer (request, response, next) =>
+      @server = http.createServer (request, response) =>
         response.request = url: request.url, method: request.method, at: new Date()
         response[method] = callback for method, callback of zenresponse
 
@@ -93,14 +93,14 @@ module.exports =
               if body isnt ""
                 parameters[key] = value for key, value of querystring.parse body
               request.parameters = parameters
-              endpoint.callback request, response, next
+              endpoint.callback request, response
           else
             form = new formidable.IncomingForm
               multiples     : true
               keepExtensions: true
             form.parse request, (error, parameters, files) ->
               request.parameters = zenrequest.multipart error, parameters, files
-              endpoint.callback request, response, next
+              endpoint.callback request, response
         else
           response.page "404", undefined, undefined, 404
 

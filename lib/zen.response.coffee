@@ -20,7 +20,8 @@ response =
 
   # -- Common responses ---------------------------------------------------------
   run: (body, code = 200, type = "application/json", headers = {}) ->
-    headers["Content-Length"] = body?.length
+    length = if Buffer.isBuffer(body) then body.length else Buffer.byteLength body
+    headers["Content-Length"] = length
     @setHeader key, value for key, value of headers
     @writeHead code, "Content-Type": type
     @write body
@@ -36,16 +37,17 @@ response =
   html: (value, body, headers = {}) ->
     @run value.toString(), body, "text/html", headers
 
-  page: (file, bindings, partials = [], code, headers = {}) ->
+  page: (file, bindings = {}, partials = [], code, headers = {}) ->
     files = {}
     files[partial] = __mustache partial for partial in partials or []
+    bindings.zen = global.ZEN
     @html mustache.to_html(__mustache(file), bindings, files), code
 
   # -- JSON responses ----------------------------------------------------------
   json: (data = {}, code, headers = {}) ->
     for key, value of global.ZEN.headers when not headers[key]
       headers[key] =  if Array.isArray(value) then value.join(",") else value
-    @run JSON.stringify(data), code, "application/json", headers
+    @run JSON.stringify(data, null, 0), code, "application/json", headers
 
   # -- STATIC files ------------------------------------------------------------
   file: (url, maxage = 60) ->
