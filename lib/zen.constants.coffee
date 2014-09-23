@@ -152,9 +152,9 @@ module.exports =
 
   STATUS:
     # 2xx Successful
-    200: "Ok"
-    201: "Created"
-    202: "Accepted"
+    200: "ok"
+    201: "created"
+    202: "accepted"
     204: "noContent"
     # 4xx Client Error
     400: "badRequest"

@@ -33,19 +33,19 @@ response =
     __output @request, 302
 
   # -- HTML responses ----------------------------------------------------------
-  html: (value, code, headers = {}) ->
-    @run value.toString(), code, "text/html", headers
+  html: (value, body, headers = {}) ->
+    @run value.toString(), body, "text/html", headers
 
-  page: (file, data, partials = [], code, headers = {}) ->
+  page: (file, bindings, partials = [], code, headers = {}) ->
     files = {}
     files[partial] = __mustache partial for partial in partials or []
-    @html mustache.to_html(__mustache(file), data, files), code
+    @html mustache.to_html(__mustache(file), bindings, files), code
 
   # -- JSON responses ----------------------------------------------------------
-  json: (body = {}, code, headers = {}) ->
+  json: (data = {}, code, headers = {}) ->
     for key, value of global.ZEN.headers when not headers[key]
       headers[key] =  if Array.isArray(value) then value.join(",") else value
-    @run JSON.stringify(body), code, "application/json", headers
+    @run JSON.stringify(data), code, "application/json", headers
 
   # -- STATIC files ------------------------------------------------------------
   file: (url, maxage = 60) ->
