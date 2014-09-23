@@ -30,35 +30,18 @@ module.exports =
     constructor: ->
       do @createEndpoints
       do @createServer
-      # -- Read resources ------------------------------------------------------
-      global.ZEN.br "ENDPOINTS"
-      for context in ["api", "www"]
-        for endpoint in global.ZEN[context] or []
-          require("../../../#{context}/#{endpoint}") @
-      # -- Read static files ---------------------------------------------------
-      global.ZEN.br "STATICS"
-      for policy in global.ZEN.statics or []
-        do (policy) =>
-          @get policy.url + "/:resource", (request, response, next) ->
-            folder = policy.folder
-            folder += "/#{request.parameters.folder}" if request.parameters.folder
-            file = request.parameters.resource
-            response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
-      # -- Service Connections -------------------------------------------------
-      if global.ZEN.mongo? or global.ZEN.redis? or global.ZEN.appnima
-        global.ZEN.br "SERVICES"
-        tasks = []
-        for connection in (global.ZEN.mongo or [])
-          tasks.push do (connection) -> -> mongo.open connection
-        if global.ZEN.redis?
-          tasks.push => redis.open global.ZEN.redis
-        if global.ZEN.appnima
-          tasks.push => appnima.open global.ZEN.appnima
-        if tasks.length > 0
-          Hope.shield(tasks).then (error, value) =>
-            process.exit() if error
-            global.ZEN.br "CTRL + C to shutdown"
-            global.ZEN.br()
+
+      Hope.shield([ =>
+        do @services
+      , =>
+        do @endpoints
+      , =>
+        do @statics
+      ]).then (error, value) =>
+        process.exit() if error
+        global.ZEN.br()
+        console.log " Listening at :#{global.ZEN.port}", "(CTRL + C to shutdown)".grey
+        global.ZEN.br()
 
     createEndpoints: ->
       @methods = {}
@@ -143,3 +126,49 @@ module.exports =
       process.on "uncaughtException", (error) =>
         console.log " ⚑".red, "ZENserver", error.message
         process.exit()
+
+    # -- Create endpoints ------------------------------------------------------
+    endpoints: ->
+      promise = new Hope.Promise()
+      global.ZEN.br "ENDPOINTS"
+      for context in ["api", "www"]
+        for endpoint in global.ZEN[context] or []
+          require("../../../#{context}/#{endpoint}") @
+      promise.done undefined, true
+      promise
+
+    # -- Read static files -----------------------------------------------------
+    statics: ->
+      promise = new Hope.Promise()
+      global.ZEN.br "STATICS"
+      for policy in global.ZEN.statics or []
+        do (policy) =>
+          @get policy.url + "/:resource", (request, response, next) ->
+            folder = policy.folder
+            folder += "/#{request.parameters.folder}" if request.parameters.folder
+            file = request.parameters.resource
+            response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
+      promise.done undefined, true
+      promise
+
+
+    # -- Service Connections -------------------------------------------------
+    services: ->
+      promise = new Hope.Promise()
+      tasks = []
+      if global.ZEN.mongo? or global.ZEN.redis? or global.ZEN.appnima
+        global.ZEN.br "SERVICES"
+        for connection in (global.ZEN.mongo or [])
+          tasks.push do (connection) -> -> mongo.open connection
+        if global.ZEN.redis?
+          tasks.push => redis.open global.ZEN.redis
+        if global.ZEN.appnima
+          tasks.push => appnima.open global.ZEN.appnima
+
+      if tasks.length > 0
+        Hope.shield(tasks).then (error, value) =>
+          process.exit() if error
+          promise.done error, value
+      else
+        promise.done undefined, true
+      promise
