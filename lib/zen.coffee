@@ -34,9 +34,9 @@ module.exports =
       Hope.shield([ =>
         do @services
       , =>
-        do @endpoints
-      , =>
         do @statics
+      , =>
+        do @endpoints
       ]).then (error, value) =>
         process.exit() if error
         global.ZEN.br()
@@ -143,12 +143,20 @@ module.exports =
     statics: ->
       promise = new Hope.Promise()
       global.ZEN.br "STATICS"
-      for policy in global.ZEN.statics or []
+      for policy in (global.ZEN.statics or []) when policy.url? or policy.file?
         do (policy) =>
-          @get policy.url + "/:resource", (request, response, next) ->
+          if policy.url
+            static_url = policy.url + "/:resource"
+          else if policy.file
+            static_url = "/#{policy.file}"
+
+          @get static_url, (request, response, next) ->
             folder = policy.folder
-            folder += "/#{request.parameters.folder}" if request.parameters.folder
-            file = request.parameters.resource
+            if policy.url
+              folder += "/#{request.parameters.subfolder}" if request.parameters.subfolder
+              file = request.parameters.resource
+            else if policy.file
+              file = policy.file
             response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
       promise.done undefined, true
       promise
