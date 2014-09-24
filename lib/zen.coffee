@@ -81,6 +81,8 @@ module.exports =
           # Middleware
           request.session = response.request.session  = zenrequest.session request
           request.required = (values = []) -> zenrequest.required values, request, response
+          request.mobile = zenrequest.mobile request
+
           parameters[key] = value for key, value of url.parse(request.url, true).query
           unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
             request.on "data", (chunk) ->

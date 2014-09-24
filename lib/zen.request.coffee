@@ -1,5 +1,7 @@
 "use strict"
 
+CONST    = require "./zen.constants"
+
 module.exports =
 
   session: (request)->
@@ -11,6 +13,15 @@ module.exports =
       key = parts[0].trim()
       session = (parts[1] or "").trim() if key is global.ZEN.session?.cookie
     session
+
+  mobile: (request) ->
+    useragent = request.headers["user-agent"].toLowerCase()
+    is_mobile = false
+    if useragent?
+      for type, regexp of CONST.MOBILE_AGENTS when regexp.test(useragent) is true
+        is_mobile = true
+        break
+    is_mobile
 
   required: (values, request, response) ->
     success = true

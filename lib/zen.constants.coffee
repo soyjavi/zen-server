@@ -174,3 +174,11 @@ module.exports =
     503: "serviceUnavailable"
     504: "gatewayTimeout"
     505: "HTTPVersionNotSupported"
+
+  MOBILE_AGENTS:
+    ios           : /ipad|iphone|ipod/i
+    android       : /android/i
+    blackberry    : /blackberry|bb10/i
+    webos         : /webos/i
+    windows_phone : /windows phone/i
+    firefox_os    : /(Mozilla).*Mobile[^\/]*\/([\d\.]*)/
