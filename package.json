@@ -1,6 +1,6 @@
 {
   "name": "zenserver",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "description": "a lean and mean http router for node.js",
   "homepage": "http://twitter.com/soyjavi",
   "keywords": [
@@ -36,7 +36,5 @@
     "node": "*"
   },
   "readme": "zen-server\n==========\n\na lean and mean http router for node.js\n",
-  "readmeFilename": "README.md",
-  "_id": "zenserver@0.9.23",
-  "_from": "zenserver@*"
+  "readmeFilename": "README.md"
 }

@@ -110,7 +110,6 @@ module.exports =
       @server.listen ZEN.port
       @server
 
-
     handleErrors: ->
       @server.on 'error', (err) ->
         console.log 'there was an error:', err.message
@@ -160,7 +159,6 @@ module.exports =
             response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
       promise.done undefined, true
       promise
-
 
     # -- Service Connections -------------------------------------------------
     services: ->

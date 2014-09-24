@@ -1,10 +1,7 @@
 "use strict";
 
-var CoffeeScript  = require('coffee-script');
-// -- Register CoffeeScript if exits -------------------------------------------
-if(CoffeeScript.register) CoffeeScript.register();
-
-var Zen           = require('./lib/zen');
+require('coffee-script/register');
+var Zen = require('./lib/zen');
 
 module.exports = {
     // Services

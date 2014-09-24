@@ -15,7 +15,7 @@ module.exports =
     session
 
   mobile: (request) ->
-    useragent = request.headers["user-agent"].toLowerCase()
+    useragent = request.headers["user-agent"]?.toLowerCase()
     is_mobile = false
     if useragent?
       for type, regexp of CONST.MOBILE_AGENTS when regexp.test(useragent) is true
