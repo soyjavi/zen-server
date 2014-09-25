@@ -7,19 +7,20 @@ ZENserver
 ###
 "use strict"
 
-request = require "request"
+http    = require "http"
 qs      = require "querystring"
 Hope    = require "hope"
 
 Appnima =
-
-  host    : "http://api.appnima.com/"
   key     : ""
+  protocol: "http"
+  host    : "api.appnima.com"
+  port    : 80
 
   open: (connection) ->
     promise = new Hope.Promise()
-    if connection.key? then @key = connection.key
-    if connection.host? then @host = connection.host
+    for key in ["key", "protocol", "host", "port"] when connection[key]?
+      @[key] = connection[key]
     console.log " ✓".green, "Appnima", "listening at".grey, "#{@host}".underline.blue
     promise.done null, true
     promise
@@ -29,12 +30,10 @@ Appnima =
     headers["user-agent"] = agent if agent
     @_proxy "POST", "user/signup", parameters, headers
 
-
   login: (parameters, agent) ->
     headers = Authorization: "basic #{@key}"
     headers["user-agent"] = agent if agent
     @_proxy "POST", "user/login", parameters, headers
-
 
   refreshToken: (agent, refresh_token) ->
     headers = Authorization: "basic #{@key}"
@@ -44,7 +43,6 @@ Appnima =
       grant_type    : "refresh_token"
     @_proxy "POST", "user/token", parameters, headers
 
-
   api: (agent, method, url, token, parameters) ->
     headers = {}
     headers["user-agent"] = agent if agent
@@ -53,21 +51,40 @@ Appnima =
 
   _proxy: (method, url, parameters = {}, headers = {}) ->
     promise = new Hope.Promise()
-    method = method.toUpperCase()
+
     options =
-      method  : method
-      uri     : "#{@host}#{url}"
+      host    : @host
+      port    : @port
+      path    : "/#{url}"
+      method  : method.toUpperCase()
       headers : headers
-    if parameters? and (method is "GET" or method is "DELETE")
-      options.uri += "?#{qs.stringify(parameters)}"
+      agent   : false
+
+    if parameters? and (options.method is "GET" or options.method is "DELETE")
+      options.path += "?#{qs.stringify(parameters)}"
     else
-      options.form = parameters
-    request options, (error, response, body) ->
-      value = JSON.parse body if body?
-      if response.statusCode >= 400
-        error = code: response.statusCode, message: value.message
-        value = null
-      promise.done error, value
+      body = qs.stringify parameters
+      options.headers["Content-Type"] = "application/x-www-form-urlencoded"
+      options.headers["Content-Length"] = body.length
+
+    client = http.request options, (response) =>
+      body = ""
+      response.setEncoding "utf8"
+      response.on "data", (chunk) -> body += chunk
+      response.on "end", ->
+        body = JSON.parse body if body?
+        if response.statusCode >= 400
+          error = code: response.statusCode, message: body.message
+          body = undefined
+        promise.done error, body
+
+    client.on "error", (error) ->
+      error = code: error.statusCode, message: error.message
+      promise.done error, undefined
+
+    client.write body
+    client.end()
+
     promise
 
 module.exports = Appnima
