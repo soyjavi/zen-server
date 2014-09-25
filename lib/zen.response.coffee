@@ -1,13 +1,16 @@
 "use strict"
 
-colors   = require "colors"
-fs       = require "fs"
-mustache = require "mustache"
-path     = require "path"
-url      = require "url"
-zlib     = require "zlib"
+colors    = require "colors"
+fs        = require "fs"
+mustache  = require "mustache"
+path      = require "path"
+url       = require "url"
+zlib      = require "zlib"
 
-CONST    = require "./zen.constants"
+LogFile   = require("./zen.logfile")
+log       = new LogFile("requests")
+
+CONST       = require "./zen.constants"
 
 response =
 
@@ -99,7 +102,7 @@ __mustache = (name) ->
     __cachedMustache[name] = "<h1> 404 - Not found</h1>"
 
 __output = (request, code, type = "", body = "") ->
-  gap = new Date() - request.at
+  latence = new Date() - request.at
   color = "red"
   if (code >= 200 and code < 300)
     color = "green"
@@ -113,5 +116,13 @@ __output = (request, code, type = "", body = "") ->
     _in = "⇠"
     _out = "⇢"
 
+  log.append
+    at    : request.at
+    method: request.method
+    url   :  url.parse(request.url).pathname
+    ms    : latence
+    code  : code
+    size  : body?.length
+
   console.log " #{_in} ".green, request.method.grey, url.parse(request.url).pathname,
-    "#{_out}  #{code}"[color], "#{gap}ms", "#{type} #{body?.length}".grey
+    "#{_out}  #{code}"[color], "#{latence}ms", "#{type} #{body?.length}".grey
