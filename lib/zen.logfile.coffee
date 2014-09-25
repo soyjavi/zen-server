@@ -14,7 +14,6 @@ class LogFile
       if @constructor.buffer[@file].length > 0
         buffer =  @constructor.buffer[@file]
         @constructor.buffer[@file] = []
-        console.log ">>"
         fs.appendFile "#{path}/#{@file}.#{_date()}.json", buffer
     , interval
 
