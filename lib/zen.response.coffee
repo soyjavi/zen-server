@@ -53,20 +53,21 @@ response =
     @run JSON.stringify(data, null, 0), code, "application/json", headers
 
   # -- STATIC files ------------------------------------------------------------
-  file: (url, maxage = 60) ->
+  file: (url, maxage = 60, last_modified = null) ->
     if fs.existsSync(url) is true
       mime_type = CONST.MIME[path.extname(url)?.slice(1)] or CONST.MIME.html
       headers =
         "Content-Type"  : mime_type
         "Content-Length": fs.statSync(url).size
         "Cache-Control" : "max-age=#{maxage.toString()}"
+        "Last-Modified" : last_modified
       if mime_type.match(/audio|video/)?
         @writeHead 200, headers
         readableStream = fs.createReadStream url
         readableStream.pipe @
         __output @request, 200, mime_type
       else
-        @run fs.readFileSync(url), 200, mime_type, headers
+        fs.readFile url, (error, result) => @run result, 200, mime_type, headers
     else
       @page "404", undefined, undefined, 404
 

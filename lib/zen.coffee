@@ -8,9 +8,11 @@ ZENserver
 "use strict"
 
 formidable    = require "formidable"
+fs            = require "fs"
 Hope          = require "hope"
 http          = require "http"
 https         = require "https"
+path          = require "path"
 querystring   = require "querystring"
 url           = require "url"
 
@@ -82,9 +84,10 @@ module.exports =
           request.session = response.request.session  = zenrequest.session request
           request.mobile = response.request.mobile = zenrequest.mobile request
           request.required = (values = []) -> zenrequest.required values, request, response
+          @headers = request.headers
 
           parameters[key] = value for key, value of url.parse(request.url, true).query
-          unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
+          unless @headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
             request.on "data", (chunk) ->
               body += chunk.toString()
               if body.length > 1e6
@@ -149,14 +152,20 @@ module.exports =
           else if policy.file
             static_url = "/#{policy.file}"
 
-          @get static_url, (request, response, next) ->
+          @get static_url, (request, response, next) =>
             folder = policy.folder
             if policy.url
               folder += "/#{request.parameters.subfolder}" if request.parameters.subfolder
-              file = request.parameters.resource
+              file = "#{__dirname}/../../../#{folder}/#{request.parameters.resource}"
             else if policy.file
-              file = policy.file
-            response.file "#{__dirname}/../../../#{folder}/#{file}", policy.maxage
+              file = "#{__dirname}/../../../#{folder}/#{policy.file}"
+            last_modified = fs.statSync file
+            mime_type = CONST.MIME[path.extname(file)?.slice(1)] or CONST.MIME.html
+            if @headers["if-modified-since"]
+              if (new Date(last_modified.mtime)).getTime() is (new Date(@headers["if-modified-since"])).getTime()
+                response.run "", 304, mime_type
+            else
+              response.file file, policy.maxage, last_modified.mtime
       promise.done undefined, true
       promise
 
