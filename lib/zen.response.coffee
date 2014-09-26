@@ -24,7 +24,7 @@ response =
   # -- Common responses ---------------------------------------------------------
   run: (body, code = 200, type = "application/json", headers = {}) ->
     length = if Buffer.isBuffer(body) then body.length else Buffer.byteLength body
-    headers["Content-Length"] = length
+    headers["Content-Length"] = length if body
     @setHeader key, value for key, value of headers
     @writeHead code, "Content-Type": type
     @write body

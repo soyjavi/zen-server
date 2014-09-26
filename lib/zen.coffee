@@ -159,13 +159,15 @@ module.exports =
               file = "#{__dirname}/../../../#{folder}/#{request.parameters.resource}"
             else if policy.file
               file = "#{__dirname}/../../../#{folder}/#{policy.file}"
-            last_modified = fs.statSync file
-            mime_type = CONST.MIME[path.extname(file)?.slice(1)] or CONST.MIME.html
-            if @headers["if-modified-since"]
-              if (new Date(last_modified.mtime)).getTime() is (new Date(@headers["if-modified-since"])).getTime()
+            if fs.existsSync(file) is true
+              last_modified = (fs.statSync(file).mtime)
+              mime_type = CONST.MIME[path.extname(file)?.slice(1)] or CONST.MIME.html
+              if @headers["if-modified-since"] and (new Date(last_modified)).getTime() is (new Date(@headers["if-modified-since"])).getTime()
                 response.run "", 304, mime_type
+              else
+                response.file file, policy.maxage, last_modified
             else
-              response.file file, policy.maxage, last_modified.mtime
+              response.page "404", undefined, undefined, 404
       promise.done undefined, true
       promise
 
