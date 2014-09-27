@@ -14,6 +14,7 @@ CONST       = require "./zen.constants"
 
 response =
 
+  # -- Session -----------------------------------------------------------------
   session: (value) ->
     @setHeader "Set-Cookie", __cookie value
 
@@ -76,6 +77,7 @@ for code, status of CONST.STATUS
 
 module.exports = response
 
+# -- Private methods -----------------------------------------------------------
 __cachedMustache = {}
 
 __cookie = (value) ->
@@ -88,8 +90,9 @@ __cookie = (value) ->
   cookie = "#{key}=#{value}; Expires=#{expires}"
   cookie += "; Path=#{global.ZEN.session.path or "/"}"
   cookie += "; Domain=#{global.ZEN.session.domain or ""}"
+  cookie += "; HttpOnly=true"
+  # cookie += "; Secure=true" @todo: only for HTTPS servers
   cookie
-
 
 __mustache = (name) ->
   dir = "#{__dirname}/../../../www/mustache/"
@@ -110,12 +113,11 @@ __output = (request, code, type = "", body = "") ->
   else if (code >= 300 and code < 400)
     color = "blue"
 
+  _in = "⇠"
+  _out = "⇢"
   if request.session?
     _in = "⇤"
     _out = "⇥"
-  else
-    _in = "⇠"
-    _out = "⇢"
 
   log.append
     at    : request.at
