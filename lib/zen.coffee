@@ -159,19 +159,22 @@ module.exports =
               file = "#{__dirname}/../../../#{folder}/#{request.parameters.resource}"
             else if policy.file
               file = "#{__dirname}/../../../#{folder}/#{policy.file}"
-            if fs.existsSync(file) is true
-              last_modified = (fs.statSync(file).mtime)
-              mime_type = CONST.MIME[path.extname(file)?.slice(1)] or CONST.MIME.html
-              if @headers["if-modified-since"] and (new Date(last_modified)).getTime() is (new Date(@headers["if-modified-since"])).getTime()
-                response.run "", 304, mime_type
+
+            if fs.existsSync file
+              last_modified = fs.statSync(file).mtime
+              cache_modified = @headers["if-modified-since"]
+              if cache_modified and __time(last_modified) is __time(cache_modified)
+                mime_type = CONST.MIME[path.extname(file)?.slice(1)] or CONST.MIME.html
+                response.run undefined, 304, mime_type
               else
                 response.file file, policy.maxage, last_modified
             else
-              response.page "404", undefined, undefined, 404
+              response.notFound()
+
       promise.done undefined, true
       promise
 
-    # -- Service Connections -------------------------------------------------
+    # -- Service Connections ---------------------------------------------------
     services: ->
       promise = new Hope.Promise()
       tasks = []
@@ -191,3 +194,6 @@ module.exports =
       else
         promise.done undefined, true
       promise
+
+# -- Private methods -----------------------------------------------------------
+__time = (value) -> (new Date(value)).getTime()
