@@ -20,7 +20,6 @@ ZEN           = require "./zen.config"
 CONST         = require "./zen.constants"
 zenrequest    = require "./zen.request"
 zenresponse   = require "./zen.response"
-
 appnima       = require "./services/appnima"
 mongo         = require "./services/mongo"
 redis         = require "./services/redis"
@@ -61,7 +60,7 @@ module.exports =
             .replace(CONST.URL_MATCH.splat, '(.*?)')
 
           @methods[method].push
-            pattern   : new RegExp '^' + pattern + '$'
+            pattern   : new RegExp pattern # new RegExp '^' + pattern + '$'
             callback  : callback
             parameters: parameters
 
@@ -84,10 +83,9 @@ module.exports =
           request.session = response.request.session  = zenrequest.session request
           request.mobile = response.request.mobile = zenrequest.mobile request
           request.required = (values = []) -> zenrequest.required values, request, response
-          @headers = request.headers
 
           parameters[key] = value for key, value of url.parse(request.url, true).query
-          unless @headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
+          unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
             request.on "data", (chunk) ->
               body += chunk.toString()
               if body.length > 1e6
@@ -147,30 +145,24 @@ module.exports =
       global.ZEN.br "STATICS"
       for policy in (global.ZEN.statics or []) when policy.url? or policy.file?
         do (policy) =>
-          if policy.url
-            static_url = policy.url + "/:resource"
-          else if policy.file
-            static_url = "/#{policy.file}"
-
-          @get static_url, (request, response, next) =>
-            folder = policy.folder
+          static_url = if policy.url? then "#{policy.url}" else "/#{policy.file}"
+          @get static_url, (request, response) ->
             if policy.url
-              folder += "/#{request.parameters.subfolder}" if request.parameters.subfolder
-              file = "#{__dirname}/../../../#{folder}/#{request.parameters.resource}"
-            else if policy.file
-              file = "#{__dirname}/../../../#{folder}/#{policy.file}"
+              file = url.parse(request.url).pathname.replace(policy.url, policy.folder)
+            else
+              file = "#{policy.folder}/#{policy.file}"
 
+            file = "#{__dirname}/../../../#{file}"
             if fs.existsSync file
               last_modified = fs.statSync(file).mtime
-              cache_modified = @headers["if-modified-since"]
-              if cache_modified and __time(last_modified) is __time(cache_modified)
+              cache_modified = request.headers["if-modified-since"]
+              if cache_modified? and __time(last_modified) is __time(cache_modified)
                 mime_type = CONST.MIME[path.extname(file)?.slice(1)] or CONST.MIME.html
                 response.run undefined, 304, mime_type
               else
                 response.file file, policy.maxage, last_modified
             else
               response.notFound()
-
       promise.done undefined, true
       promise
 

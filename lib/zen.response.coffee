@@ -23,7 +23,7 @@ response =
     delete @request.session
 
   # -- Common responses ---------------------------------------------------------
-  run: (body, code = 200, type = "application/json", headers = {}) ->
+  run: (body = "", code = 200, type = "application/json", headers = {}) ->
     length = if Buffer.isBuffer(body) then body.length else Buffer.byteLength body
     headers["Content-Length"] = length if body
     @setHeader key, value for key, value of headers
@@ -55,11 +55,15 @@ response =
 
   # -- STATIC files ------------------------------------------------------------
   file: (url, maxage = 60, last_modified = null) ->
-    if fs.existsSync(url) is true
+    is_valid = false
+    if fs.existsSync(url) and stat = fs.statSync(url)
+      is_valid = true if stat?.isFile()
+
+    if is_valid
       mime_type = CONST.MIME[path.extname(url)?.slice(1)] or CONST.MIME.html
       headers =
         "Content-Type"  : mime_type
-        "Content-Length": fs.statSync(url).size
+        "Content-Length": stat.size
         "Cache-Control" : "max-age=#{maxage.toString()}"
         "Last-Modified" : last_modified
       if mime_type.match(/audio|video/)?
