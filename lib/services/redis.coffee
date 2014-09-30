@@ -28,7 +28,7 @@ Redis =
     promise
 
   close: ->
-    console.log "▣".red, "REDIS/#{@host}:#{@port}".underline.red, "closed connection"
+    console.log " ✓".green, "Redis", "closed connection correctly.".grey
     do @client.quit
 
   set: (key, value) -> @client.SET String(key), value

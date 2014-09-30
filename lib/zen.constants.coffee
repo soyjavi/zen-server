@@ -2,6 +2,8 @@
 
 module.exports =
 
+  TIMEOUT : 60000
+
   HTTP_METHODS: ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
   URL_MATCH   :
     name  : /:([\w\d]+)/g

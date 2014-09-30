@@ -24,13 +24,14 @@ response =
 
   # -- Common responses ---------------------------------------------------------
   run: (body = "", code = 200, type = "application/json", headers = {}) ->
-    length = if Buffer.isBuffer(body) then body.length else Buffer.byteLength body
-    headers["Content-Length"] = length if body
-    @setHeader key, value for key, value of headers
-    @writeHead code, "Content-Type": type
-    @write body
-    @end()
-    __output @request, @statusCode, type, body
+    if not @headersSent
+      length = if Buffer.isBuffer(body) then body.length else Buffer.byteLength body
+      headers["Content-Length"] = length if body
+      @setHeader key, value for key, value of headers
+      @writeHead code, "Content-Type": type
+      @write body
+      @end()
+      __output @request, @statusCode, type, body
 
   redirect: (url) ->
     @writeHead 302, "Location": url
@@ -95,7 +96,7 @@ __cookie = (value) ->
   cookie += "; Path=#{global.ZEN.session.path or "/"}"
   cookie += "; Domain=#{global.ZEN.session.domain or ""}"
   cookie += "; HttpOnly=true"
-  # cookie += "; Secure=true" @todo: only for HTTPS servers
+  cookie += "; Secure=true" if ZEN.protocol is "https"
   cookie
 
 __mustache = (name) ->

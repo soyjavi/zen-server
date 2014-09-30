@@ -33,4 +33,4 @@ module.exports =
   close: ->
     for name of @connections
       @connections[name].close ->
-        console.log "▣".green, "MONGO/#{name}".underline.green, "closed connection"
+        console.log " ✓".green, "MongoDB:/#{name}", "closed connection correctly.".grey

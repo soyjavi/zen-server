@@ -25,9 +25,7 @@ mongo         = require "./services/mongo"
 redis         = require "./services/redis"
 
 module.exports =
-
   class ZenServer
-
     constructor: ->
       do @createEndpoints
       do @createServer
@@ -40,9 +38,9 @@ module.exports =
         do @endpoints
       ]).then (error, value) =>
         process.exit() if error
-        global.ZEN.br()
-        console.log " Listening at :#{global.ZEN.port}", "(CTRL + C to shutdown)".grey
-        global.ZEN.br()
+        ZEN.br()
+        console.log " Listening at :#{ZEN.port}", "(CTRL + C to shutdown)".grey
+        ZEN.br()
 
     createEndpoints: ->
       @methods = {}
@@ -65,9 +63,11 @@ module.exports =
             parameters: parameters
 
     createServer: ->
-      @server = http.createServer (request, response) =>
+      @server = __server()
+      @server.on "request", (request, response) =>
         response.request = url: request.url, method: request.method, at: new Date()
         response[method] = callback for method, callback of zenresponse
+        response.setTimeout ZEN.timeout, -> response.requestTimeout()
 
         body = ""
         parameters = {}
@@ -107,34 +107,34 @@ module.exports =
         else
           response.page "404", undefined, undefined, 404
 
-      do @handleErrors
+      @server.timeout = ZEN.timeout or CONST.TIMEOUT
       @server.listen ZEN.port
+      do @handleErrors
       @server
 
     handleErrors: ->
-      @server.on 'error', (err) ->
-        console.log 'there was an error:', err.message
-      @server.on "uncaughtException", (request, response, error) ->
-        response.send "error": error.message
-        console.log " ⚑".red, request.url, "ERROR: #{error.message}"
-      @server.setTimeout ZEN.timeout, (callback) -> @ if ZEN.timeout
-
-      process.on "SIGTERM", =>
-        @server.close()
-      process.on "SIGINT", =>
-        @server.close()
-      process.on "exit", =>
-        console.log "\n ▣", "ZENserver", "stopped correctly"
+      # @server.on "timeout", (response) -> response.end()
+      @server.on "close", ->
+        console.log ""
+        ZEN.br "ZENserver shutdown..."
+        if ZEN.mongo? then mongo.close()
+        if ZEN.redis? then redis.close()
+        console.log " ✓".green, "shutdown ok!".grey
+        ZEN.br()
       process.on "uncaughtException", (error) =>
-        console.log " ⚑".red, "ZENserver", error.message
-        process.exit()
+        console.log " ⚑  ERR".red, "uncaughtException:", error.message.grey
+        process.exit 1
+      process.on "SIGTERM", =>
+        @server.close -> process.exit 1
+      process.on "SIGINT", =>
+        @server.close -> process.exit 1
 
     # -- Create endpoints ------------------------------------------------------
     endpoints: ->
       promise = new Hope.Promise()
-      global.ZEN.br "ENDPOINTS"
+      ZEN.br "ENDPOINTS"
       for context in ["api", "www"]
-        for endpoint in global.ZEN[context] or []
+        for endpoint in ZEN[context] or []
           require("../../../#{context}/#{endpoint}") @
       promise.done undefined, true
       promise
@@ -142,8 +142,8 @@ module.exports =
     # -- Read static files -----------------------------------------------------
     statics: ->
       promise = new Hope.Promise()
-      global.ZEN.br "STATICS"
-      for policy in (global.ZEN.statics or []) when policy.url? or policy.file?
+      ZEN.br "STATICS"
+      for policy in (ZEN.statics or []) when policy.url? or policy.file?
         do (policy) =>
           static_url = if policy.url? then "#{policy.url}" else "/#{policy.file}"
           @get static_url, (request, response) ->
@@ -170,14 +170,14 @@ module.exports =
     services: ->
       promise = new Hope.Promise()
       tasks = []
-      if global.ZEN.mongo? or global.ZEN.redis? or global.ZEN.appnima
-        global.ZEN.br "SERVICES"
-        for connection in (global.ZEN.mongo or [])
+      if ZEN.mongo? or ZEN.redis? or ZEN.appnima
+        ZEN.br "SERVICES"
+        for connection in (ZEN.mongo or [])
           tasks.push do (connection) -> -> mongo.open connection
-        if global.ZEN.redis?
-          tasks.push => redis.open global.ZEN.redis
-        if global.ZEN.appnima
-          tasks.push => appnima.open global.ZEN.appnima
+        if ZEN.redis?
+          tasks.push => redis.open ZEN.redis
+        if ZEN.appnima
+          tasks.push => appnima.open ZEN.appnima
 
       if tasks.length > 0
         Hope.shield(tasks).then (error, value) =>
@@ -189,3 +189,12 @@ module.exports =
 
 # -- Private methods -----------------------------------------------------------
 __time = (value) -> (new Date(value)).getTime()
+
+__server = (value) ->
+  if ZEN.protocol is "https"
+    certificates = __dirname + "/../../../certificates/"
+    https.createServer
+      key   : fs.readFileSync("#{certificates}key.pem")
+      cert  : fs.readFileSync("#{certificates}cert.pem")
+  else
+    http.createServer()
