@@ -1,8 +1,8 @@
 {
   "name": "zenserver",
-  "version": "0.9.30b",
+  "version": "0.10.01",
   "description": "a lean and mean http router for node.js",
-  "homepage": "http://twitter.com/soyjavi",
+  "homepage": "https://github.com/soyjavi/zenproxy",
   "keywords": [
     "server",
     "router",

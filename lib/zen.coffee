@@ -95,14 +95,15 @@ module.exports =
             request.on "end", ->
               if body isnt ""
                 parameters[key] = value for key, value of querystring.parse body
-              request.parameters = parameters
+              request.parameters = __cast parameters
               endpoint.callback request, response
           else
             form = new formidable.IncomingForm
               multiples     : true
               keepExtensions: true
             form.parse request, (error, parameters, files) ->
-              request.parameters = zenrequest.multipart error, parameters, files
+              parameters = zenrequest.multipart error, parameters, files
+              request.parameters = __cast parameters
               endpoint.callback request, response
         else
           response.page "404", undefined, undefined, 404
@@ -190,7 +191,7 @@ module.exports =
 # -- Private methods -----------------------------------------------------------
 __time = (value) -> (new Date(value)).getTime()
 
-__server = (value) ->
+__server = ->
   if ZEN.protocol is "https"
     certificates = __dirname + "/../../../certificates/"
     https.createServer
@@ -198,3 +199,8 @@ __server = (value) ->
       cert  : fs.readFileSync("#{certificates}cert.pem")
   else
     http.createServer()
+
+__cast = (values) ->
+  for key, value of values when value in ["true", "false"]
+    values[key] = JSON.parse value
+  values
