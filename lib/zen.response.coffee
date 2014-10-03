@@ -6,11 +6,11 @@ mustache  = require "mustache"
 path      = require "path"
 url       = require "url"
 zlib      = require "zlib"
+CONST     = require "./zen.constants"
 
-LogFile   = require("./zen.logfile")
-log       = new LogFile("requests")
-
-CONST       = require "./zen.constants"
+if ZEN.audit
+  LogFile = require("./zen.logfile")
+  log     = new LogFile("requests", ZEN.audit.interval)
 
 response =
 
@@ -124,13 +124,14 @@ __output = (request, code, type = "", body = "") ->
     _in = "⇤"
     _out = "⇥"
 
-  log.append
-    at    : request.at
-    method: request.method
-    url   :  url.parse(request.url).pathname
-    ms    : latence
-    code  : code
-    size  : body?.length
+  if ZEN.audit
+    log.append
+      at    : request.at
+      method: request.method
+      url   :  url.parse(request.url).pathname
+      ms    : latence
+      code  : code
+      size  : body?.length
 
   console.log " #{_in} ".green, request.method.grey, url.parse(request.url).pathname,
     "#{_out}  #{code}"[color], "#{latence}ms", "#{type} #{body?.length}".grey
