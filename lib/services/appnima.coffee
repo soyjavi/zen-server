@@ -43,11 +43,11 @@ Appnima =
       grant_type    : "refresh_token"
     @_proxy "POST", "user/token", parameters, headers
 
-  api: (agent, method, url, token, parameters) ->
+  api: (parameters, agent) ->
     headers = {}
     headers["user-agent"] = agent if agent
-    headers.authorization = "bearer #{token}" if token?
-    @_proxy method, url, parameters, headers
+    headers.authorization = "bearer #{parameters.token}" if parameters.token?
+    @_proxy parameters.method, parameters.url, parameters.values, headers
 
   _proxy: (method, url, parameters = {}, headers = {}) ->
     promise = new Hope.Promise()
@@ -60,6 +60,7 @@ Appnima =
       headers : headers
       agent   : false
 
+    body = ""
     if parameters? and (options.method is "GET" or options.method is "DELETE")
       options.path += "?#{qs.stringify(parameters)}"
     else
