@@ -1,6 +1,6 @@
 {
   "name": "zenserver",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "description": "a lean and mean http router for node.js",
   "homepage": "https://github.com/soyjavi/zenproxy",
   "keywords": [
@@ -33,9 +33,5 @@
   "main": "./index.js",
   "engines": {
     "node": "*"
-  },
-  "readme": "zen-server\n==========\n\na lean and mean http router for node.js\n",
-  "readmeFilename": "README.md",
-  "_id": "zenserver@0.10.1",
-  "_from": "zenserver@*"
+  }
 }
