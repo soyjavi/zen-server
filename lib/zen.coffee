@@ -58,7 +58,7 @@ module.exports =
             .replace(CONST.URL_MATCH.splat, '(.*?)')
 
           @methods[method].push
-            pattern   : new RegExp pattern # new RegExp '^' + pattern + '$'
+            pattern   : new RegExp "^#{pattern}" # new RegExp '^' + pattern + '$'
             callback  : callback
             parameters: parameters
 
@@ -152,7 +152,6 @@ module.exports =
               file = url.parse(request.url).pathname.replace(policy.url, policy.folder)
             else
               file = "#{policy.folder}/#{policy.file}"
-
             file = "#{__dirname}/../../../#{file}"
             if fs.existsSync file
               last_modified = fs.statSync(file).mtime
