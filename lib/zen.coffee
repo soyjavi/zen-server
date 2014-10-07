@@ -162,7 +162,7 @@ module.exports =
               else
                 response.file file, policy.maxage, last_modified
             else
-              response.notFound()
+              response.page "404", undefined, undefined, 404
       promise.done undefined, true
       promise
 
