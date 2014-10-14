@@ -39,8 +39,8 @@ response =
     __output @request, 302
 
   # -- HTML responses ----------------------------------------------------------
-  html: (value, body, headers = {}) ->
-    @run value.toString(), body, "text/html", headers
+  html: (value, code, headers = {}) ->
+    @run value.toString(), code, "text/html", headers
 
   page: (file, bindings = {}, partials = [], code, headers = {}) ->
     files = {}
