@@ -468,5 +468,6 @@ zen.get "/", (request, response, next) ->
 ```
 
 ### 3.5 Redirecciones
+En el caso de que quieras redireccionar a otra ruta, ZENserver te lo pone muy facil.
 
 ### 3.6 Servir ficheros y streaming
