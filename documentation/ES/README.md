@@ -468,6 +468,35 @@ zen.get "/", (request, response, next) ->
 ```
 
 ### 3.5 Redirecciones
-En el caso de que quieras redireccionar a otra ruta, ZENserver te lo pone muy facil.
+En el caso de que cuando se acceda a un endpoint necesites dar como respuesta otra página por medio de una redirección, ZENserver te lo vuelve a poner fácil. Un ejemplo sería por ejemplo el acceso a endpoints solo cuando el usuario tuviese sesión y en caso contrario redirigirle al endpoint de login. Veamos como hacerlo:
+
+```
+zen.get "/dashboard", (request, response) ->
+  if response.session
+    response.page "dashboard", bindings, partials
+  else
+    response.redirect "/login"
+```
+
+Como podemos ver si el cliente quiere acceder al endpoint */dashboard* deberá tener sesión (ya sea por cookie o HTTPAuthentication), en caso de que no la tenga utilizaremos el método `response.redirect` para redirigirle al endpoint */login*.
 
 ### 3.6 Servir ficheros y streaming
+A pesar de que NodeJS no es el mejor sistema para servir archivos estáticos ZENserver te ofrece una solución sencilla y eficiente para este propósito.
+
+Únicamente tendrémos que utilizar el método `response.file` el cual se encargará de analizar el tipo de fichero que quieres servir y ofrecer el mejor método de transmisión. Por ejemplo si estamos intentando servir algún tipo de fichero multimedia como pueden ser video o audio, ZENserver automáticamente realizará un *streaming* del mismo. Veamos un ejemplo:
+
+```
+zen.get "/video/:id", (request, response) ->
+  response.file "/assets/video/#{request.parameters.id}.avi"
+```
+	
+Como puedes ver es muy sencillo, dando toda la responsabilidad a ZENserver para que decida como transmitir el archivo. Señalar que en el caso de que el fichero */assets/video/?.id* no existiese devolverá un HTTPStatusCode 404. 
+
+El método `response.file` creará un pequeño cacheo en el cliente, por defecto de 60 segundos, en el caso de que queramos aumentar o reducir este caching, solo tenemos que pasarlo en el segundo parametro:
+
+```
+url_file = "/assets/image/tapquo.jpg"
+response.file url_file, maxage = 3600
+```
+
+En este caso hemos asignado al fichero */assets/image/tapquo.jpg* una cache en el cliente de 1 hora (3600 segundos).
