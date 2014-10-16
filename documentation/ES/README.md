@@ -10,7 +10,7 @@ Nuestro compromiso es utilizar el menor número de dependencias y ofrecer nuestr
 
 ### 1.1 Instalación
 
-Para instalar una nueva instancia de ZEN-server únicamente tienes que ejecutar el comando:
+Para instalar una nueva instancia de ZENserver únicamente tienes que ejecutar el comando:
 
 ```
 npm install zenserver --save-dev
