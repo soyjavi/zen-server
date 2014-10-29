@@ -12,9 +12,13 @@ class LogFile
     @constructor.buffer[@file] = []
     @interval = setInterval =>
       if @constructor.buffer[@file].length > 0
-        buffer =  @constructor.buffer[@file]
+        buffer =  @constructor.buffer[@file] or []
         @constructor.buffer[@file] = []
-        fs.appendFile "#{path}/#{@file}.#{_date()}.json", buffer
+        file_name = "#{path}/#{@file}.#{_date()}.json"
+        fs.readFile file_name, "utf8", (error, data) =>
+          data = if error or data?.length is 0 then [] else JSON.parse data
+          data = data.concat buffer
+          fs.writeFile file_name, JSON.stringify(data, null, 0), "utf8"
     , interval
 
   append: (values = {}) ->

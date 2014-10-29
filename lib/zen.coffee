@@ -137,6 +137,7 @@ module.exports =
       for context in ["api", "www"]
         for endpoint in ZEN[context] or []
           require("../../../#{context}/#{endpoint}") @
+      do @audit if ZEN.audit
       promise.done undefined, true
       promise
 
@@ -186,6 +187,19 @@ module.exports =
       else
         promise.done undefined, true
       promise
+
+    # -- Audit requests --------------------------------------------------------
+    audit: ->
+      @get "/audit/:password/:file", (request, response) ->
+        if request.parameters.password is ZEN.audit.password
+          file = "#{__dirname}/../../../logs/audit.#{request.parameters.file}.json"
+          fs.readFile file, (error, data) ->
+            unless error
+              response.json JSON.parse(data), 200, headers = {}, audit = false
+            else
+              response.notFound()
+        else
+          response.unauthorized()
 
 # -- Private methods -----------------------------------------------------------
 __time = (value) -> (new Date(value)).getTime()

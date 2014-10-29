@@ -10,7 +10,7 @@ CONST     = require "./zen.constants"
 
 if ZEN.audit
   LogFile = require("./zen.logfile")
-  log     = new LogFile("requests", ZEN.audit.interval)
+  log     = new LogFile("audit", ZEN.audit.interval)
 
 response =
 
@@ -23,7 +23,7 @@ response =
     delete @request.session
 
   # -- Common responses ---------------------------------------------------------
-  run: (body = "", code = 200, type = "application/json", headers = {}) ->
+  run: (body = "", code = 200, type = "application/json", headers = {}, audit = true) ->
     if not @headersSent
       length = if Buffer.isBuffer(body) then body.length else Buffer.byteLength body
       headers["Content-Length"] = length if body
@@ -31,7 +31,7 @@ response =
       @writeHead code, "Content-Type": type
       @write body
       @end()
-      __output @request, @statusCode, type, body
+      __output @request, @statusCode, type, body, audit
 
   redirect: (url) ->
     @writeHead 302, "Location": url
@@ -39,8 +39,8 @@ response =
     __output @request, 302
 
   # -- HTML responses ----------------------------------------------------------
-  html: (value, code, headers = {}) ->
-    @run value.toString(), code, "text/html", headers
+  html: (value, body, headers = {}) ->
+    @run value.toString(), body, "text/html", headers
 
   page: (file, bindings = {}, partials = [], code, headers = {}) ->
     files = {}
@@ -49,10 +49,10 @@ response =
     @html mustache.to_html(__mustache(file), bindings, files), code
 
   # -- JSON responses ----------------------------------------------------------
-  json: (data = {}, code, headers = {}) ->
+  json: (data = {}, code, headers = {}, audit = true) ->
     for key, value of global.ZEN.headers when not headers[key]
       headers[key] =  if Array.isArray(value) then value.join(",") else value
-    @run JSON.stringify(data, null, 0), code, "application/json", headers
+    @run JSON.stringify(data, null, 0), code, "application/json", headers, audit
 
   # -- STATIC files ------------------------------------------------------------
   file: (url, maxage = 60, last_modified = null) ->
@@ -110,7 +110,7 @@ __mustache = (name) ->
   else
     __cachedMustache[name] = "<h1> 404 - Not found</h1>"
 
-__output = (request, code, type = "", body = "") ->
+__output = (request, code, type = "", body = "", audit = true) ->
   latence = new Date() - request.at
   color = "red"
   if (code >= 200 and code < 300)
@@ -124,11 +124,11 @@ __output = (request, code, type = "", body = "") ->
     _in = "⇤"
     _out = "⇥"
 
-  if ZEN.audit
+  if audit and ZEN.audit
     log.append
       at    : request.at
       method: request.method
-      url   :  url.parse(request.url).pathname
+      url   : url.parse(request.url).pathname
       ms    : latence
       code  : code
       size  : body?.length
