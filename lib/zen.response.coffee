@@ -46,7 +46,7 @@ response =
     files = {}
     files[partial] = __mustache partial for partial in partials or []
     bindings.zen = global.ZEN
-    @html mustache.to_html(__mustache(file), bindings, files), code
+    @html mustache.render(__mustache(file), bindings, files), code
 
   # -- JSON responses ----------------------------------------------------------
   json: (data = {}, code, headers = {}, audit = true) ->
