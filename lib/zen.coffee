@@ -82,6 +82,7 @@ module.exports =
           # Middleware
           request.session = response.request.session  = zenrequest.session request
           request.mobile = response.request.mobile = zenrequest.mobile request
+          request.ip = response.request.ip = request.headers["x-forwarded-for"] or request.connection.remoteAddress
           request.required = (values = []) -> zenrequest.required values, request, response
 
           parameters[key] = value for key, value of url.parse(request.url, true).query
