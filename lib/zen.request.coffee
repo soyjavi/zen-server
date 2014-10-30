@@ -23,6 +23,12 @@ module.exports =
         break
     is_mobile
 
+  agent: (request) ->
+    request.headers["user-agent"]?.toLowerCase()
+
+  ip: (request) ->
+    request.headers["x-forwarded-for"]?.split(",")[0] or request.connection.remoteAddress
+
   required: (values, request, response) ->
     success = true
     for name in values when not request.parameters[name]?
