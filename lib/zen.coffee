@@ -12,6 +12,7 @@ fs            = require "fs"
 Hope          = require "hope"
 http          = require "http"
 https         = require "https"
+os            = require "os"
 path          = require "path"
 querystring   = require "querystring"
 url           = require "url"
@@ -37,6 +38,7 @@ module.exports =
       , =>
         do @endpoints
       ]).then (error, value) =>
+        __monitorProcess()
         process.exit() if error
         ZEN.br()
         console.log " Listening at :#{ZEN.port}", "(CTRL + C to shutdown)".grey
@@ -139,7 +141,7 @@ module.exports =
       for context in ["api", "www"]
         for endpoint in ZEN[context] or []
           require("../../../#{context}/#{endpoint}") @
-      do @audit if ZEN.audit
+      do @monitor if ZEN.monitor
       promise.done undefined, true
       promise
 
@@ -191,11 +193,11 @@ module.exports =
       promise
 
     # -- Audit requests --------------------------------------------------------
-    audit: ->
-      @get "/audit/:password/:file", (request, response) ->
-        if request.parameters.password is ZEN.audit.password
-          file = "#{__dirname}/../../../logs/audit.#{request.parameters.file}.json"
-          fs.readFile file, (error, data) ->
+    monitor: ->
+      @get "/monitor/:password/:file/:date", (request, response) ->
+        if request.parameters.password is ZEN.monitor.password
+          file = "#{request.parameters.file}.#{request.parameters.date}.json"
+          fs.readFile "#{__dirname}/../../../monitor/#{file}", (error, data) ->
             unless error
               response.json JSON.parse(data), 200, headers = {}, audit = false
             else
@@ -219,3 +221,25 @@ __cast = (values) ->
   for key, value of values when value in ["true", "false"]
     values[key] = JSON.parse value
   values
+
+__monitorProcess = ->
+  if ZEN.monitor
+    Monitor = require("./zen.monitor")
+    monitor = new Monitor("server", ZEN.monitor.process)
+    MB = 1024 * 1024
+    setInterval =>
+      monitor.append
+        at      : new Date()
+        pid     : process.pid
+        version : process.version
+        arch    : process.arch
+        platform: process.platform
+        uptime  : process.uptime()
+        memtotal: process.memoryUsage().heapTotal / MB
+        # memused : process.memoryUsage().heapUsed / MB
+        system  :
+          uptime  : os.uptime()
+          # totalmem: os.totalmem() / MB
+          freemem : os.freemem()/ MB
+          loadavg : os.loadavg()
+    , ZEN.monitor.process

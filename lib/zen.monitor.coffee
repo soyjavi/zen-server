@@ -1,9 +1,9 @@
 "use strict"
 
 fs       = require "fs"
-path     = "#{__dirname}/../../../logs"
+path     = "#{__dirname}/../../../monitor"
 
-class LogFile
+class Monitor
 
   @buffer : {}
 
@@ -28,6 +28,6 @@ class LogFile
     clearInterval @interval
     @constructor.buffer[@file] = []
 
-module.exports = LogFile
+module.exports = Monitor
 
 _date = -> (new Date()).toISOString().slice(0,10).replace(/-/g,"")
