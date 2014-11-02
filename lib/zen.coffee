@@ -231,15 +231,10 @@ __monitorProcess = ->
       monitor.append
         at      : new Date()
         pid     : process.pid
-        version : process.version
-        arch    : process.arch
-        platform: process.platform
         uptime  : process.uptime()
         memtotal: process.memoryUsage().heapTotal / MB
-        # memused : process.memoryUsage().heapUsed / MB
         system  :
           uptime  : os.uptime()
-          # totalmem: os.totalmem() / MB
           freemem : os.freemem()/ MB
           loadavg : os.loadavg()
     , ZEN.monitor.process
