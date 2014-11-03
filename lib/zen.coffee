@@ -138,10 +138,10 @@ module.exports =
     endpoints: ->
       promise = new Hope.Promise()
       ZEN.br "ENDPOINTS"
+      do @monitor if ZEN.monitor
       for context in ["api", "www"]
         for endpoint in ZEN[context] or []
           require("../../../#{context}/#{endpoint}") @
-      do @monitor if ZEN.monitor
       promise.done undefined, true
       promise
 
