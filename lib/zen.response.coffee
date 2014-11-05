@@ -131,10 +131,11 @@ __output = (request, code, type = "", body = "", audit = true) ->
   if audit and ZEN.monitor
     monitor.append
       at    : request.at
-      method: request.method
       ip    : request.ip
       agent : request.agent
+      method: request.method
       url   : url.parse(request.url).pathname
-      ms    : latence
       code  : code
+      type  : type
+      ms    : latence
       size  : body?.length
