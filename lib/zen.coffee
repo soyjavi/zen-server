@@ -48,7 +48,7 @@ module.exports =
       @methods = {}
       CONST.HTTP_METHODS.forEach (method) =>
         @methods[method] = []
-        @[method.toLowerCase()] = (pattern, callback) ->
+        @[method.toLowerCase()] = (pattern, callback, endpoint = true) ->
           console.log " ✓".green, "[#{method.substr(0,3)}]".grey, "#{pattern}"
           parameters = []
           for name, regexp of CONST.URL_MATCH
@@ -58,9 +58,10 @@ module.exports =
             .replace(CONST.URL_MATCH.escape, '\\$&')
             .replace(CONST.URL_MATCH.name, '([^\/]*)')
             .replace(CONST.URL_MATCH.splat, '(.*?)')
+          pattern = if endpoint then "^#{pattern}$" else "^#{pattern}"
 
           @methods[method].push
-            pattern   : new RegExp "^#{pattern}" # new RegExp '^' + pattern + '$'
+            pattern   : new RegExp pattern
             callback  : callback
             parameters: parameters
 
@@ -176,6 +177,7 @@ module.exports =
                 response.file file, policy.maxage, last_modified
             else
               response.page "404", undefined, undefined, 404
+          , endpoint = false
       promise.done undefined, true
       promise
 
