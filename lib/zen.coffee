@@ -67,7 +67,6 @@ module.exports =
     createServer: ->
       @server = __server()
       @server.on "request", (request, response) =>
-
         if request.method.toUpperCase() is "OPTIONS"
           headers = {}
           for key, value of ZEN.headers
