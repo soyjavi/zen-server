@@ -67,6 +67,15 @@ module.exports =
     createServer: ->
       @server = __server()
       @server.on "request", (request, response) =>
+
+        if request.method.toUpperCase() is "OPTIONS"
+          headers = {}
+          for key, value of ZEN.headers
+            headers[key] = if Array.isArray(value) then value.join(", ") else value
+          headers["Access-Control-Allow-Origin"] = request.headers.origin or "*"
+          response.writeHead "204", "No Content", headers
+          response.end()
+
         response.request = url: request.url, method: request.method, at: new Date()
         response[method] = callback for method, callback of zenresponse
         response.setTimeout ZEN.timeout, -> response.requestTimeout()
