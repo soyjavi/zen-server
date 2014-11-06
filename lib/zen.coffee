@@ -19,8 +19,8 @@ url           = require "url"
 
 ZEN           = require "./zen.config"
 CONST         = require "./zen.constants"
+zenfirewall   = require "./zen.firewall"
 zenrequest    = require "./zen.request"
-zenresponse   = require "./zen.response"
 appnima       = require "./services/appnima"
 mongo         = require "./services/mongo"
 redis         = require "./services/redis"
@@ -68,58 +68,42 @@ module.exports =
     createServer: ->
       @server = __server()
       @server.on "request", (request, response) =>
-        if request.method.toUpperCase() is "OPTIONS"
-          headers = {}
-          for key, value of ZEN.headers
-            headers[key] = if Array.isArray(value) then value.join(", ") else value
-          headers["Access-Control-Allow-Origin"] = request.headers.origin or "*"
-          response.writeHead "204", "No Content", headers
-          response.end()
+        if zenfirewall request, response
+          body = ""
+          parameters = {}
+          match = undefined
+          for endpoint in @methods[request.method]
+            match = endpoint.pattern.exec url.parse(request.url).pathname
+            if match
+              parameters[endpoint.parameters[i]] = value for value, i in match.slice(1)
+              break
 
-        response.request = url: request.url, method: request.method, at: new Date()
-        response[method] = callback for method, callback of zenresponse
-        response.setTimeout ZEN.timeout, -> response.requestTimeout()
-
-        body = ""
-        parameters = {}
-        match = undefined
-        for endpoint in @methods[request.method]
-          match = endpoint.pattern.exec url.parse(request.url).pathname
           if match
-            parameters[endpoint.parameters[i]] = value for value, i in match.slice(1)
-            break
+            request.required = (values = []) -> zenrequest.required values, request, response
 
-        if match
-          # Middleware
-          request.session = response.request.session  = zenrequest.session request
-          request.agent = response.request.agent = zenrequest.agent request
-          request.mobile = response.request.mobile = zenrequest.mobile request
-          request.ip = response.request.ip = zenrequest.ip request
-          request.required = (values = []) -> zenrequest.required values, request, response
-
-          parameters[key] = value for key, value of url.parse(request.url, true).query
-          unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
-            request.on "data", (chunk) ->
-              body += chunk.toString()
-              if body.length > 1e6
-                body = ""
-                response.run "", 413, "text/plain"
-                request.connection.destroy()
-            request.on "end", ->
-              if body isnt ""
-                parameters[key] = value for key, value of querystring.parse body
-              request.parameters = __cast parameters
-              endpoint.callback request, response
+            parameters[key] = value for key, value of url.parse(request.url, true).query
+            unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
+              request.on "data", (chunk) ->
+                body += chunk.toString()
+                if body.length > 1e6
+                  body = ""
+                  response.run "", 413, "text/plain"
+                  request.connection.destroy()
+              request.on "end", ->
+                if body isnt ""
+                  parameters[key] = value for key, value of querystring.parse body
+                request.parameters = __cast parameters
+                endpoint.callback request, response
+            else
+              form = new formidable.IncomingForm
+                multiples     : true
+                keepExtensions: true
+              form.parse request, (error, parameters, files) ->
+                parameters = zenrequest.multipart error, parameters, files
+                request.parameters = __cast parameters
+                endpoint.callback request, response
           else
-            form = new formidable.IncomingForm
-              multiples     : true
-              keepExtensions: true
-            form.parse request, (error, parameters, files) ->
-              parameters = zenrequest.multipart error, parameters, files
-              request.parameters = __cast parameters
-              endpoint.callback request, response
-        else
-          response.page "404", undefined, undefined, 404
+            response.page "404", undefined, undefined, 404
 
       @server.timeout = ZEN.timeout or CONST.TIMEOUT
       @server.listen ZEN.port
