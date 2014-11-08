@@ -1,9 +1,9 @@
 ZEN-server
 ==========
 
-Es el modulo principal de ZEN, en el encontraras todas las herramientas
+Es el módulo principal de ZEN, en el encontrarás todas las herramientas
 necesarias para crear servidores web con NodeJS. La principal diferencia frente
-a otras soluciones es la no dependencia de modulos de terceros, algo muy común
+a otras soluciones es la no dependencia de módulos de terceros, algo muy común
 en proyectos NodeJS pero que a la larga, puede ofrecer problemas.
 
 Nuestro compromiso es utilizar el menor número de dependencias y ofrecer nuestra
@@ -17,15 +17,15 @@ experiencia con NodeJS de una manera sencilla e intuitiva.
 Para instalar una nueva instancia de ZENserver únicamente tienes que ejecutar el
 comando:
 
-```
-npm install zenserver --save-dev
+```bash
+npm install zenserver --save
 ```
 
 De esta manera tendrás todo lo necesario para comenzar con el proyecto. Otra
 manera, algo más rudimentaria, es modificar el fichero `package.json` incluyendo
 esta nueva dependencia:
 
-```
+```json
 {
   "name"            : "zen-server-instance",
   "version"         : "1.0.0",
@@ -53,7 +53,7 @@ cobra una gran importancia a la hora de configurar los servicios disponibles en
 tu *server*. Vamos a ir analizando cada una de las opciones que nos permite
 establecer el fichero `zen.yml`:
 
-```
+```yaml
 protocol: http # or https
 host    : localhost
 port    : 8888
@@ -64,7 +64,7 @@ Esta sección te permite establecer la configuración de tu servidor; el
 **protocolo** que vas a utilizar (`http` o `https`), el **nombre** del host,
 **puerto** y **zona horaria**.
 
-```
+```yaml
 environment: development
 ```
 
@@ -75,7 +75,7 @@ preproducción, producción...). En este caso, como hemos establecido el valor
 *environments/development.yml* para sobreescribir los atributos que tengas
 establecidos en el fichero */zen.yml*.
 
-```
+```yaml
 api:
   - index
 
@@ -90,7 +90,7 @@ resultados (HTML, images...). En este ejemplo, ZENserver buscará los endpoints
 posterior tratamiento. En el capítulo 2 veremos como se crean los endpoints y
 las diferentes posibilidades que nos ofrece.
 
-```
+```yaml
 statics:
   - url     : /temp/resources
     folder  : /static
@@ -108,11 +108,11 @@ El atributo **statics** nos ofrece una forma sencilla de ofrecer ficheros
 estáticos en nuestro servidor. Podemos ofrecer directorios completos por medio
 del atributo `url` o un fichero determinado mediante `file`. Para ambos casos
 debemos establecer la ruta relativa al directorio del proyecto mediante el
-atributo `folder`. En el caso de que necesitemos que los recursos tenga *cache*
-simplemente tenemos que establecer el numero de segundos mediante el atributo
+atributo `folder`. En el caso de que necesitemos que los recursos tenga *caché*
+simplemente tenemos que establecer el número de segundos mediante el atributo
 condicional `maxage`.
 
-```
+```yaml
 session:
   # Cookie Request
   cookie: zencookie
@@ -130,7 +130,7 @@ para el cual es válida la cookie, **ruta** y **expiración**. **session** tambi
 nos permite que la asignación sea por cabecera en una petición http. En este
 ejemplo, ese atributo tiene el valor `zenauth`.
 
-```
+```yaml
 audit:
   interval: 60000 #miliseconds
 ```
@@ -140,26 +140,21 @@ que sucede en nuestro servidor mientras se está ejecutando. Genera un fichero
 por día en el directorio */logs* con información de todas las peticiones que le
 llegan al servidor. Por cada petición obtenemos los siguientes datos:
 
--   Endpoint que se esta solicitando
-
--   Método: GET, POST, PUT...
-
--   Tiempo de proceso en milisegundos
-
--   Código HTTP de respuesta
-
--   Tamaño de respuesta en bytes
-
--   Cliente (proximamente)
+-   Endpoint que se esta solicitando.
+-   Método (GET, POST, PUT, DELETE,...).
+-   Tiempo de proceso en milisegundos.
+-   Código HTTP de respuesta.
+-   Tamaño de respuesta en bytes.
+-   Cliente (próximamente).
 
 De esta manera podrás analizar como están usando los usuarios tu servidor e
 incluso poder identificar *errores*, *bottlenecks* o puntos de mejora. En el
 caso de que queramos auditar nuestro servidor únicamente tenemos que establecer
-el atributo interval con el numero de milisegundos que queremos que tenga en
+el atributo interval con el número de milisegundos que queremos que tenga en
 memoria los datos (antes de volcar en el fichero de logs). Esto es así para no
-sobrecargar el numero de escrituras en disco.
+sobrecargar el número de escrituras en disco.
 
-```
+```yaml
 headers:
   Access-Control-Allow-Origin: "*"
   Access-Control-Allow-Credentials: true
@@ -198,7 +193,7 @@ establecer los valores básicos de tu servidor. Si has nombrado tus ficheros de
 arranque y configuración como `zen.js` y `zen.yml` la forma de iniciar el
 servidor es de la siguiente manera:
 
-```
+```bash
 $node zen.js zen
 ```
 
@@ -208,7 +203,7 @@ fichero zen.yml así como el environment declarado.
 Puedes arrancar tu servidor sobreescribiendo los valores del zen.yml pasando por
 línea de comando los siguientes argumentos:
 
-```
+```bash
 $node [fichero JS] [fichero YML] [ENVIRONMENT] [PUERTO]
 $node zen config production 1980
 ```
@@ -224,13 +219,13 @@ argumentos más:
     sustituyendo al atributo `environment` existente en el fichero de
     configuración zen.yml.
 
--   **1980**: El numero de puerto a utilizar por la instancia de ZENserver
+-   **1980**: El número de puerto a utilizar por la instancia de ZENserver
     sustituyendo al atributo `port` existente en el fichero de configuración
     zen.yml.
 
 Señalar que no es obligatorio tener que asignar todos los parámetros pero si
 respetar el orden de los mismos. Con esto, en el caso de que queramos asignar un
-nuevo numero de puerto, es necesario pasar los argumentos anteriores.
+nuevo número de puerto, es necesario pasar los argumentos anteriores.
 
 2. Servidor API
 ---------------
@@ -244,7 +239,8 @@ funcionalidades y capacidades que te ofrece ZENserver. Como vimos en el capítul
 Vamos a crear nuestro primer API endpoint para ello vamos a crear un fichero
 `hello.coffee` en la carpeta */api*:
 
-```
+
+```coffee
 "use strict"
 
 module.exports = (zen) ->
@@ -259,7 +255,7 @@ de tipo `GET` y que tiene como ruta de acceso `/hello`, el *callback* que se
 ejecuta cada vez que se acceda a la misma nos devuelve dos parámetros:
 
 -   **request**: Es el objeto nativo de NodeJS pero sobrevitaminado con
-    ZENserver. En posteriores apartados veremos las
+    ZENserver. En posteriores apartados veremos las opcions extras que ZENserver nos ofrece sobre éste objeto.
 
 -   **response**: Al igual que el anterior es el objeto nativo, pero como
     podemos ver con la función `json` (no existente en NodeJS) viene con
@@ -272,7 +268,7 @@ En el caso de que quisiesemos capturar otros métodos http podríamos hacerlo en
 el mismo fichero `hello.coffee`. Veamos como podríamos capturar otros métodos
 además del `GET`:
 
-```
+```coffee
 "use strict"
 
 module.exports = (zen) ->
@@ -309,7 +305,7 @@ a un determinada area del mismo: */user/soyjavi/messages* o
 */user/cataflu/followers*, para ello podríamos utilizar la URL condicional
 `/user/:id/:context`:
 
-```
+```coffee
 zen.get "/user/:id/:context", (request, response) ->
   response.json request.parameters
 ```
@@ -323,14 +319,14 @@ tratamiento de parámetros, pero como adelanto este método devolvería: `{id:
 
 Si continuamos con el endpoint anterior `/user/:id/:context` vamos a realizar
 ciertos ejercicios con los parámetros que nos lleguen. Como vimos
-`request.parameters` contiene un objeto con todos los parámetros que se envién.
+`request.parameters` contiene un objeto con todos los parámetros que se envíen.
 Por ejemplo para la url:
 
 `http://domain.com/user/soyjavi/messages?order_by=date&page=20`
 
 Obtendríamos automáticamente:
 
-```
+```json
 {
     id: "soyjavi",
     context: "messages",
@@ -339,12 +335,12 @@ Obtendríamos automáticamente:
 ```
 
 Evidentemente podemos acceder a cada uno de los valores de manera independiente,
-por ejemplo `request.parameters.id` tendría como valor `"soyjavi"`. En el caso
+por ejemplo `request.parameters.id` tendría como valor `"soyjavi"`. En el casocaché
 de que queramos testear si existe un determinado parámetros podemos utilizar el
 método `request.required` al cual debemos enviarle un array de parámetros a
 testear:
 
-```
+```coffee
 zen.get "/domain/:id/:context", (request, response) ->
   if request.required ["name"]
     response.json request.parameters
@@ -364,7 +360,7 @@ el caso de que exista nos devolverá el valor de la sesión. Esta podrá ser via
 Veamos como establecer una nueva sesión via cookie, para ello vamos a crear un
 nuevo endpoint `/login`:
 
-```
+```coffee
 zen.get "/login", (request, response) ->
   response.session "10293sjad092a"
   response.json "cookie": true
@@ -376,7 +372,7 @@ que la persistencia de la cookie que acabas de crear viene dada por la
 parametrización establecida en el fichero de configuración. Ahora veamos como
 eliminar esa cookie por medio de otro endpoint `/logout`:
 
-```
+```coffee
 zen.get "/logout", (request, response) ->
   response.logout()
   response.json "cookie": false
@@ -388,7 +384,7 @@ método `response.logout` antes de devolver una respuesta.
 Si retomamos el endpoint del capítulo anteriores podríamos unir la sesión (en el
 caso de que exista) con los parámetros:
 
-```
+```coffee
 zen.get "/domain/:id/:context", (request, response) ->
   if request.required ["name"]
     request.parameters.session = request.session
@@ -401,7 +397,7 @@ Por ahora solo conocemos el método json de manera superficial, además de
 establecer el objeto que queremos devolver podemos, indicar un *HTTPStatusCode*
 (por defecto 200) y unas *HTTPHeaders*. Por ejemplo:
 
-```
+```coffee
 values =
   username: "cataflu",
   name    : "Catalina"headers =
@@ -418,7 +414,7 @@ se ocupará de crear una respuesta `401` con el mensaje `"Bad Request"`.
 
 Si quieres conocer todos los mensajes predefinidos: **2xx Successful**
 
-```
+```yaml
 200: "ok"
 201: "created"
 202: "accepted"
@@ -427,7 +423,7 @@ Si quieres conocer todos los mensajes predefinidos: **2xx Successful**
 
 **4xx Client Error**
 
-```
+```yaml
 400: "badRequest"
 401: "unauthorized"
 402: "paymentRequired"
@@ -442,7 +438,7 @@ Si quieres conocer todos los mensajes predefinidos: **2xx Successful**
 
 **5xx Server Error**
 
-```
+```yaml
 500: "internalServerError"
 501: "notImplemented"
 502: "badGateway"
@@ -464,7 +460,7 @@ Vamos a crear un fichero form.coffee en el directorio */www* el cual contendrá
 nuestro primer www endpoint. En este caso cuando se acceda a la ruta */form* en
 modo `GET` ZENserver responderá con un formulario:
 
-```
+```coffee
 zen.get "/form", (request, response) ->
   response.html """
     <form action="/form" method="post">
@@ -482,7 +478,7 @@ Para ello utilizamos el método `response.html` que al igual que con
 endpoint `/form` los datos contenidos en el mismo, para ello vamos a crear su
 endpoint:
 
-```
+```coffee
 zen.post "/form", (request, response) ->
   if request.required ["name", "username"]
     response.html "<h1>Hi #{request.parameters.name}!</h1>"
@@ -503,7 +499,7 @@ reutilización y gestión correctamente de tus páginas.
 
 Para ello vamos a crear un fichero `base.mustache` dentro de */www/mustache*:
 
-```
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -524,7 +520,7 @@ Para ello vamos a crear un fichero `base.mustache` dentro de */www/mustache*:
 Ahora crearemos un nuevo endpoint `index.coffee` que permitirá mostrará la
 página diseñada al entrar en la ruta */*:
 
-```
+```coffee
 zen.get "/", (request, response) ->
   response.page "base"
 ```
@@ -547,7 +543,7 @@ Vamos a enviarle datos a nuestra plantilla para que este las renderize,
 comunmente conocido como *binding* de datos. Para ello vamos a modificar nuestra
 plantilla `base.mustache`:
 
-```
+```html
 ...
   <h1>Hello World! {{title}}</h1>
 ...
@@ -580,7 +576,7 @@ sería aislar ese código HTML y poder incluirlo en todas las plantillas que
 necesitemos ¿no?. Bien vamos a ver como lo podemos hacer con nuestra plantilla
 mustache:
 
-```
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -606,7 +602,7 @@ templates:
 
 **partial.example.mustache**
 
-```
+```html
 <section>
     <h2>partial.example</h2>
     subdomain: <strong>{{user.name}}</strong>
@@ -616,7 +612,7 @@ templates:
 
 **partial.session.mustache**
 
-```
+```html
 <section>
     <h2>partial.session</h2>
     Session: <strong>{{session}}</strong>
@@ -650,7 +646,7 @@ Un ejemplo sería por ejemplo el acceso a endpoints solo cuando el usuario
 tuviese sesión y en caso contrario redirigirle al endpoint de login. Veamos como
 hacerlo:
 
-```
+```coffee
 zen.get "/dashboard", (request, response) ->
   if response.session
     response.page "dashboard", bindings, partials
@@ -671,26 +667,26 @@ ZENserver te ofrece una solución sencilla y eficiente para este propósito.
 Únicamente tendrémos que utilizar el método `response.file` el cual se encargará
 de analizar el tipo de fichero que quieres servir y ofrecer el mejor método de
 transmisión. Por ejemplo si estamos intentando servir algún tipo de fichero
-multimedia como pueden ser video o audio, ZENserver automáticamente realizará un
+multimedia como pueden ser vídeo o audio, ZENserver automáticamente realizará un
 *streaming* del mismo. Veamos un ejemplo:
 
-```
-zen.get "/video/:id", (request, response) ->
-  response.file "/assets/video/#{request.parameters.id}.avi"
+```coffee
+zen.get "/vídeo/:id", (request, response) ->
+  response.file "/assets/vídeo/#{request.parameters.id}.avi"
 ```
 
 Como puedes ver es muy sencillo, dando toda la responsabilidad a ZENserver para
 que decida como transmitir el archivo. Señalar que en el caso de que el fichero
-*/assets/video/?.id* no existiese devolverá un HTTPStatusCode 404.
+*/assets/vídeo/?.id* no existiese devolverá un HTTPStatusCode 404.
 
 El método `response.file` creará un pequeño cacheo en el cliente, por defecto de
 60 segundos, en el caso de que queramos aumentar o reducir este caching, solo
 tenemos que pasarlo en el segundo parametro:
 
-```
+```coffee
 url_file = "/assets/image/tapquo.jpg"
 response.file url_file, maxage = 3600
 ```
 
-En este caso hemos asignado al fichero */assets/image/tapquo.jpg* una cache en
+En este caso hemos asignado al fichero */assets/image/tapquo.jpg* una caché en
 el cliente de 1 hora (3600 segundos).
