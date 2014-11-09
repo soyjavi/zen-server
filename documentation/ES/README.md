@@ -239,7 +239,6 @@ funcionalidades y capacidades que te ofrece ZENserver. Como vimos en el capítul
 Vamos a crear nuestro primer API endpoint para ello vamos a crear un fichero
 `hello.coffee` en la carpeta */api*:
 
-
 ```coffee
 "use strict"
 
@@ -255,7 +254,8 @@ de tipo `GET` y que tiene como ruta de acceso `/hello`, el *callback* que se
 ejecuta cada vez que se acceda a la misma nos devuelve dos parámetros:
 
 -   **request**: Es el objeto nativo de NodeJS pero sobrevitaminado con
-    ZENserver. En posteriores apartados veremos las opcions extras que ZENserver nos ofrece sobre éste objeto.
+    ZENserver. En posteriores apartados veremos las opcions extras que ZENserver
+    nos ofrece sobre este objeto.
 
 -   **response**: Al igual que el anterior es el objeto nativo, pero como
     podemos ver con la función `json` (no existente en NodeJS) viene con
@@ -301,7 +301,7 @@ En el caso de que necesitemos tener URLs condicionales y que sean manejadas por
 el mismo endpoint podemos usar el enrutador condicional de ZENserver.
 
 Por ejemplo, necesitamos un endpoint que capture cuando se accede a un usuario y
-a un determinada area del mismo: */user/soyjavi/messages* o
+a una determinada area del mismo: */user/soyjavi/messages* o
 */user/cataflu/followers*, para ello podríamos utilizar la URL condicional
 `/user/:id/:context`:
 
@@ -310,17 +310,17 @@ zen.get "/user/:id/:context", (request, response) ->
   response.json request.parameters
 ```
 
-Como vemos devolvemos como respuesta un objeto json contenido en
+Como vemos, devolvemos como respuesta un objeto json contenido en
 `request.parameters`. En el siguiente capítulo veremos con más detalle el
-tratamiento de parámetros, pero como adelanto este método devolvería: `{id:
+tratamiento de parámetros, pero como adelanto, este método devolvería: `{id:
 "soyjavi", context: "messages"}` y `{id: "cataflu", context: "followers"}`
 
 ### 2.3 Parámetros
 
 Si continuamos con el endpoint anterior `/user/:id/:context` vamos a realizar
 ciertos ejercicios con los parámetros que nos lleguen. Como vimos
-`request.parameters` contiene un objeto con todos los parámetros que se envíen.
-Por ejemplo para la url:
+`request.parameters` contiene un objeto con todos los parámetros que se le
+envíen. Por ejemplo para la url:
 
 `http://domain.com/user/soyjavi/messages?order_by=date&page=20`
 
@@ -328,14 +328,15 @@ Obtendríamos automáticamente:
 
 ```json
 {
-    id: "soyjavi",
-    context: "messages",
+    id      : "soyjavi",
+    context : "messages",
     order_by: "date",
-    page: 20}
+    page    : 20
+}
 ```
 
 Evidentemente podemos acceder a cada uno de los valores de manera independiente,
-por ejemplo `request.parameters.id` tendría como valor `"soyjavi"`. En el casocaché
+por ejemplo `request.parameters.id` tendría como valor `"soyjavi"`. En el caso
 de que queramos testear si existe un determinado parámetros podemos utilizar el
 método `request.required` al cual debemos enviarle un array de parámetros a
 testear:
@@ -346,8 +347,8 @@ zen.get "/domain/:id/:context", (request, response) ->
     response.json request.parameters
 ```
 
-En el caso de que name no fuese enviado ZENserver devolverá una respuesta con
-código *httpstatus* `400` indicando el primer parámetro no encontrado:
+Si el parámetro `"name"` no fuese enviado, ZENserver devolverá una respuesta con
+código *httpstatus* `400` indicando que el parámetro no ha sido encontrado:
 `{message: "name is required."}`
 
 ### 2.4 Control de sesión
@@ -366,11 +367,11 @@ zen.get "/login", (request, response) ->
   response.json "cookie": true
 ```
 
-Como vemos antes de devolver una respuesta establecemos una nueva cookie con el
+Como vemos, antes de devolver una respuesta establecemos una nueva cookie con el
 valor `"10293sjad092a"` mediante el método `response.session`. Hay que señalar
 que la persistencia de la cookie que acabas de crear viene dada por la
-parametrización establecida en el fichero de configuración. Ahora veamos como
-eliminar esa cookie por medio de otro endpoint `/logout`:
+parametrización establecida en el fichero de configuración `zen.yml`. Ahora
+veamos como eliminar esa cookie por medio de otro endpoint `/logout`:
 
 ```coffee
 zen.get "/logout", (request, response) ->
@@ -378,8 +379,8 @@ zen.get "/logout", (request, response) ->
   response.json "cookie": false
 ```
 
-Como vemos no difiere mucho a la creación, únicamente tenemos que llamar al
-método `response.logout` antes de devolver una respuesta.
+Como vemos, no difiere mucho a la creación, únicamente tenemos que llamar al
+método `response.logout()` antes de devolver una respuesta.
 
 Si retomamos el endpoint del capítulo anteriores podríamos unir la sesión (en el
 caso de que exista) con los parámetros:
@@ -394,13 +395,14 @@ zen.get "/domain/:id/:context", (request, response) ->
 ### 2.5 HTTP Status Messages
 
 Por ahora solo conocemos el método json de manera superficial, además de
-establecer el objeto que queremos devolver podemos, indicar un *HTTPStatusCode*
+establecer el objeto que queremos devolver, podemos indicar un *HTTPStatusCode*
 (por defecto 200) y unas *HTTPHeaders*. Por ejemplo:
 
 ```coffee
 values =
   username: "cataflu",
-  name    : "Catalina"headers =
+  name    : "Catalina"
+headers =
   domain  : "http://domain.com"
 
 response.json values, 201, headers
@@ -412,7 +414,10 @@ determinado endpoint queremos devolver que el cliente no tiene permiso
 simplemente tendríamos que llamar al método `response.badRequest()` y ZENServer
 se ocupará de crear una respuesta `401` con el mensaje `"Bad Request"`.
 
-Si quieres conocer todos los mensajes predefinidos: **2xx Successful**
+A continuación, se listan los mensajes predefinidos que puede devolver
+ZENserver:
+
+**2xx Successful**
 
 ```yaml
 200: "ok"
@@ -457,7 +462,7 @@ igual manera lo realmente sencillo que es crear páginas webs.
 ### 3.1 Nuestro primer *WWW* endpoint
 
 Vamos a crear un fichero form.coffee en el directorio */www* el cual contendrá
-nuestro primer www endpoint. En este caso cuando se acceda a la ruta */form* en
+nuestro primer www endpoint. En este caso, cuando se acceda a la ruta */form* en
 modo `GET` ZENserver responderá con un formulario:
 
 ```coffee
@@ -474,7 +479,7 @@ zen.get "/form", (request, response) ->
 
 Para ello utilizamos el método `response.html` que al igual que con
 `response.json` es un método ofrecido por ZENserver bajo el objeto nativo
-`response`. En este caso ofrecemos un formulario que enviará mediante POST al
+`response`. En este caso, ofrecemos un formulario que enviará mediante POST al
 endpoint `/form` los datos contenidos en el mismo, para ello vamos a crear su
 endpoint:
 
@@ -484,14 +489,14 @@ zen.post "/form", (request, response) ->
     response.html "<h1>Hi #{request.parameters.name}!</h1>"
 ```
 
-Al igual que en el resto de endpoints podemos tratar los parametros, ZENserver
-te abstrae de la captura de parametros independientemente del tipo que sean:
-get, post, multipart...
+Al igual que en el resto de endpoints aquí también podemos tratar los parametros
+de la request. ZENserver te abstrae de la captura de parametros
+independientemente del tipo que sean: get, post, multipart...
 
 ### 3.2 Plantillas Mustache
 
 Ya has aprendido como devolver código HTML en un determinado endpoint, pero
-realmente no es la opción eficiente. Ahora vas a aprender a utilizar las
+realmente, esta no es la opción eficiente. Ahora vas a aprender a utilizar las
 plantillas [Mustache][2] que vienen incluidas en ZENserver para facilitar la
 reutilización y gestión correctamente de tus páginas.
 
@@ -517,8 +522,8 @@ Para ello vamos a crear un fichero `base.mustache` dentro de */www/mustache*:
 </html>
 ```
 
-Ahora crearemos un nuevo endpoint `index.coffee` que permitirá mostrará la
-página diseñada al entrar en la ruta */*:
+Ahora crearemos un nuevo endpoint `index.coffee` que mostrará la página diseñada
+al entrar en la ruta */*:
 
 ```coffee
 zen.get "/", (request, response) ->
@@ -530,8 +535,8 @@ fichero `base.mustache` dentro de */www/mustache*.
 
 En el caso de que el fichero mustache no existiese, no hay ningún problema
 puesto que ZENserver buscará un fichero `404.mustache` en el mismo directorio
-para mostrar una página de error html, si a su vez este fichero tampoco existe
-devolverá un html `<h1> 404 - Not found</h1>`.
+para mostrar una página de error html, si a su vez este fichero tampoco
+existiera, ZENserver devolverá un html `<h1> 404 - Not found</h1>`.
 
 ### 3.3 Bindings
 
@@ -539,9 +544,9 @@ En el anterior capítulo hemos visto como renderizar una página sencilla por
 medio de un fichero Mustache. De todas formas todavía no hemos utilizado ninguna
 de las funcionalidades que nos ofrece Mustache.
 
-Vamos a enviarle datos a nuestra plantilla para que este las renderize,
-comunmente conocido como *binding* de datos. Para ello vamos a modificar nuestra
-plantilla `base.mustache`:
+Vamos a enviarle datos a nuestra plantilla para que las renderize, esto se
+conoce como *binding* de datos. Para ello vamos a modificar nuestra plantilla
+`base.mustache`:
 
 ```html
 ...
@@ -552,7 +557,7 @@ plantilla `base.mustache`:
 Ahora desde nuestro endpoint tendríamos que enviar una variable con nombre
 `title`:
 
-```
+```coffee
 zen.get "/", (request, response) ->
   bindings =
     title   : "ZENserver"
@@ -561,7 +566,7 @@ zen.get "/", (request, response) ->
   response.page "base", bindings
 ```
 
-Como ves hemos creado un objeto `bindings`, donde contenemos todos los datos que
+Como ves, hemos creado un objeto `bindings` que contiene todos los datos que
 queremos enviarle a nuestra plantilla mustache. Una vez tengas los datos en tu
 plantilla podrás hacer condicionales, iteradores y demás funcionalidades típicas
 de este tipo de templates. Para conocer todo lo que puedes hacer echa un vistazo
@@ -573,7 +578,7 @@ a la documentación de [Mustache][3].
 
 Imagina que vamos a utilizar una sección de HTML en varias páginas, lo mejor
 sería aislar ese código HTML y poder incluirlo en todas las plantillas que
-necesitemos ¿no?. Bien vamos a ver como lo podemos hacer con nuestra plantilla
+necesitemos, ¿no?. Bien vamos a ver como lo podemos hacer con nuestra plantilla
 mustache:
 
 ```html
@@ -625,7 +630,7 @@ templates:
 
 Ahora desde nuestro endpoint vamos a completar el binding:
 
-```
+```coffee
 zen.get "/", (request, response, next) ->
   bindings =
     title : "zenserver"
@@ -642,9 +647,8 @@ zen.get "/", (request, response, next) ->
 
 En el caso de que cuando se acceda a un endpoint necesites dar como respuesta
 otra página por medio de una redirección, ZENserver te lo vuelve a poner fácil.
-Un ejemplo sería por ejemplo el acceso a endpoints solo cuando el usuario
-tuviese sesión y en caso contrario redirigirle al endpoint de login. Veamos como
-hacerlo:
+Un ejemplo es el acceso a endpoints solo cuando el usuario tenga sesión y en
+caso contrario redirigirle al endpoint de login. Veamos como hacerlo:
 
 ```coffee
 zen.get "/dashboard", (request, response) ->
@@ -675,9 +679,10 @@ zen.get "/vídeo/:id", (request, response) ->
   response.file "/assets/vídeo/#{request.parameters.id}.avi"
 ```
 
-Como puedes ver es muy sencillo, dando toda la responsabilidad a ZENserver para
-que decida como transmitir el archivo. Señalar que en el caso de que el fichero
-*/assets/vídeo/?.id* no existiese devolverá un HTTPStatusCode 404.
+Como puedes ver es muy sencillo, ya que se delega toda la responsabilidad a
+ZENserver para que decida como transmitir el archivo. Señalar que en el caso de
+que el fichero */assets/vídeo/?.id* no existiese ZENserver devolverá un
+HTTPStatusCode 404.
 
 El método `response.file` creará un pequeño cacheo en el cliente, por defecto de
 60 segundos, en el caso de que queramos aumentar o reducir este caching, solo
@@ -688,5 +693,5 @@ url_file = "/assets/image/tapquo.jpg"
 response.file url_file, maxage = 3600
 ```
 
-En este caso hemos asignado al fichero */assets/image/tapquo.jpg* una caché en
+En este caso, hemos asignado al fichero */assets/image/tapquo.jpg* una caché en
 el cliente de 1 hora (3600 segundos).
