@@ -11,8 +11,6 @@ module.exports = (request, response) ->
 
   valid = true
 
-  # console.log "*", request.method, request.url, request.headers.origin, request.headers.host
-
   # Middleware
   response.request = url: request.url, method: request.method, at: new Date()
   response[method] = callback for method, callback of zenresponse
