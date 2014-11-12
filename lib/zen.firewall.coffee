@@ -7,9 +7,25 @@ CONST         = require "./zen.constants"
 zenrequest    = require "./zen.request"
 zenresponse   = require "./zen.response"
 
-module.exports = (request, response) ->
+if ZEN.firewall?
+  fs            = require "fs"
+  path_firewall = "#{__dirname}/../../../firewall"
+  file_name     = "#{path_firewall}/blacklist.json"
+  blacklist     = {}
+  fs.mkdirSync path_firewall unless fs.existsSync path_firewall
+  fs.readFile file_name, "utf8", (error, data) =>
+    ZEN.blacklist = if error or data?.length is 0 then {} else JSON.parse data
 
+module.exports = (request, response) ->
   valid = true
+
+  # Blacklist block
+  if ZEN.firewall?
+    request.ip = zenrequest.ip request
+    if parseInt(ZEN.blacklist?[request.ip]) >= 10
+      valid = false
+      response.writeHead 403
+      response.end()
 
   # Middleware
   response.request = url: request.url, method: request.method, at: new Date()
@@ -18,16 +34,17 @@ module.exports = (request, response) ->
   request.session = response.request.session  = zenrequest.session request
   request.agent = response.request.agent = zenrequest.agent request
   request.mobile = response.request.mobile = zenrequest.mobile request
-  request.ip = response.request.ip = zenrequest.ip request
+  response.request.ip = request.ip
 
   if ZEN.firewall?
-    # IP blacklist
-
     # Extensions control
     extension = path.extname(request.url)?.slice(1).toLowerCase()
     if extension in (ZEN.firewall.extensions or [])
-      response.run "", code = 403
       valid = false
+      response.run "", code = 403
+      # Add to blacklist request
+      ZEN.blacklist[request.ip] = (ZEN.blacklist[request.ip] or 0) + 1
+      fs.writeFile file_name, JSON.stringify(ZEN.blacklist, null, 0), "utf8"
 
   # CORS Authorization
   if request.method.toUpperCase() is "OPTIONS"
