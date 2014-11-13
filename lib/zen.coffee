@@ -120,7 +120,11 @@ module.exports =
         console.log " ✓".green, "shutdown ok!".grey
         ZEN.br()
       process.on "uncaughtException", (error) =>
-        console.log " ⚑  ERR".red, "uncaughtException:", error.message.grey
+        stack1 = error.stack.indexOf " at "
+        stack2 = error.stack.indexOf " at ", stack1 + 1
+        file = error.stack.slice stack1, stack2
+        console.log(" ⚑  ERR".red, "uncaughtException:", __date(new Date()),
+          error.message.grey, file)
         process.exit 1
       process.on "SIGTERM", =>
         @server.close -> process.exit 1
@@ -201,6 +205,9 @@ module.exports =
 
 # -- Private methods -----------------------------------------------------------
 __time = (value) -> (new Date(value)).getTime()
+
+__date = (value) ->
+  [(value.getDate()), (value.getMonth()+1), value.getFullYear()].join '/'
 
 __server = ->
   if ZEN.protocol is "https"
