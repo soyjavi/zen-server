@@ -120,11 +120,15 @@ module.exports =
         console.log " ✓".green, "shutdown ok!".grey
         ZEN.br()
       process.on "uncaughtException", (error) =>
-        stack1 = error.stack.indexOf " at "
-        stack2 = error.stack.indexOf " at ", stack1 + 1
-        error_trace = "uncaughtException: #{__date(new Date())}"
-        file = error.stack.slice stack1, stack2
-        console.log(" ⚑  ERR".red, error_trace, error.message.grey, file)
+        console.log(" ⚑ [uncaughtException]".red, new Date().toString().grey,
+          "\n   #{error.message.toUpperCase()}".red,
+          "\n  ", error.stack)
+        file_name = "#{__dirname}/../../../zen.error.json"
+        error =
+          date: new Date()
+          stack: error.stack
+        fs.writeFileSync file_name, JSON.stringify(error, null, 0), "utf8"
+
         process.exit 1
       process.on "SIGTERM", =>
         @server.close -> process.exit 1
