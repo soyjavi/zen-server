@@ -122,9 +122,9 @@ module.exports =
       process.on "uncaughtException", (error) =>
         stack1 = error.stack.indexOf " at "
         stack2 = error.stack.indexOf " at ", stack1 + 1
+        error_trace = "uncaughtException: #{__date(new Date())}"
         file = error.stack.slice stack1, stack2
-        console.log(" ⚑  ERR".red, "uncaughtException:", __date(new Date()),
-          error.message.grey, file)
+        console.log(" ⚑  ERR".red, error_trace, error.message.grey, file)
         process.exit 1
       process.on "SIGTERM", =>
         @server.close -> process.exit 1
