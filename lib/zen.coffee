@@ -210,9 +210,6 @@ module.exports =
 # -- Private methods -----------------------------------------------------------
 __time = (value) -> (new Date(value)).getTime()
 
-__date = (value) ->
-  [(value.getDate()), (value.getMonth()+1), value.getFullYear()].join '/'
-
 __server = ->
   if ZEN.protocol is "https"
     certificates = __dirname + "/../../../certificates/"
