@@ -7,6 +7,7 @@ ZENserver
 ###
 "use strict"
 
+domain        = require "domain"
 formidable    = require "formidable"
 fs            = require "fs"
 Hope          = require "hope"
@@ -68,6 +69,14 @@ module.exports =
     createServer: ->
       @server = __server()
       @server.on "request", (request, response) =>
+
+        ZEN.domain = domain.create()
+        ZEN.domain.add request
+        ZEN.domain.add response
+        ZEN.domain.on "error", (error) ->
+          __errorStack error
+          response.internalServerError()
+
         if zenfirewall request, response
           body = ""
           parameters = {}
@@ -107,33 +116,18 @@ module.exports =
 
       @server.timeout = ZEN.timeout or CONST.TIMEOUT
       @server.listen ZEN.port
-      do @handleErrors
+      do @handleProcess
       @server
 
-    handleErrors: ->
-      # @server.on "timeout", (response) -> response.end()
-      @server.on "close", ->
-        console.log ""
-        ZEN.br "ZENserver shutdown..."
-        if ZEN.mongo? then mongo.close()
-        if ZEN.redis? then redis.close()
-        console.log " ✓".green, "shutdown ok!".grey
-        ZEN.br()
+    handleProcess: ->
       process.on "uncaughtException", (error) =>
-        console.log(" ⚑ [uncaughtException]".red, new Date().toString().grey,
-          "\n   #{error.message.toUpperCase()}".red,
-          "\n  ", error.stack)
-        file_name = "#{__dirname}/../../../zen.error.json"
-        error =
-          date: new Date()
-          stack: error.stack
-        fs.writeFileSync file_name, JSON.stringify(error, null, 0), "utf8"
-
+        __errorStack error
         process.exit 1
-      process.on "SIGTERM", =>
-        @server.close -> process.exit 1
-      process.on "SIGINT", =>
-        @server.close -> process.exit 1
+      for event in ["SIGTERM", "SIGINT"]
+        process.on event, =>
+          do __serverClose
+          @server.close()
+          process.exit 0
 
     # -- Create endpoints ------------------------------------------------------
     endpoints: ->
@@ -219,6 +213,14 @@ __server = ->
   else
     http.createServer()
 
+__serverClose = ->
+  console.log ""
+  ZEN.br "ZENserver shutdown..."
+  if ZEN.mongo? then mongo.close()
+  if ZEN.redis? then redis.close()
+  console.log " ✓".green, "shutdown ok!".grey
+  ZEN.br()
+
 __cast = (values) ->
   for key, value of values when value in ["true", "false"]
     values[key] = JSON.parse value
@@ -240,3 +242,13 @@ __monitorProcess = ->
           freemem : os.freemem()/ MB
           loadavg : os.loadavg()
     , ZEN.monitor.process
+
+__errorStack = (error) ->
+  console.log(" ⚑ [uncaughtException]".red, new Date().toString().grey,
+    "\n   #{error.message.toUpperCase()}".red,
+    "\n  ", error.stack)
+  file_name = "#{__dirname}/../../../zen.error.json"
+  error =
+    date: new Date()
+    stack: error.stack
+  fs.writeFileSync file_name, JSON.stringify(error, null, 0), "utf8"
