@@ -51,7 +51,7 @@ module.exports = (request, response) ->
     headers = {}
     for key, value of ZEN.headers
       headers[key] = if Array.isArray(value) then value.join(", ") else value
-    headers["Access-Control-Allow-Origin"] = request.headers.origin or "*"
+    headers = null if headers["Access-Control-Allow-Origin"] not in [request.headers.origin, "*"]
     response.writeHead "204", "No Content", headers
     response.end()
     valid = false
