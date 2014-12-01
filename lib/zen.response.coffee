@@ -102,7 +102,7 @@ __cookie = (value) ->
 
 __mustache = (name) ->
   dir = "#{__dirname}/../../../www/mustache/"
-  if __cachedMustache[name]
+  if __cachedMustache[name] and (global.ZEN.mustache?.cache or not global.ZEN.mustache)
     __cachedMustache[name]
   else if fs.existsSync file = "#{dir}#{name}.mustache"
     __cachedMustache[name] = fs.readFileSync file, "utf8"
