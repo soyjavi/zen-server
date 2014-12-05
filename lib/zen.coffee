@@ -208,8 +208,8 @@ __server = ->
   if ZEN.protocol is "https"
     certificates = __dirname + "/../../../certificates/"
     https.createServer
-      key   : fs.readFileSync("#{certificates}key.pem")
-      cert  : fs.readFileSync("#{certificates}cert.pem")
+      cert  : fs.readFileSync("#{certificates}#{ZEN.cert}")
+      key   : fs.readFileSync("#{certificates}#{ZEN.key}")
   else
     http.createServer()
 
