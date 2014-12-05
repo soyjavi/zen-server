@@ -7,15 +7,15 @@ ZENserver
 ###
 "use strict"
 
-http    = require "http"
+https   = require "https"
 qs      = require "querystring"
 Hope    = require "hope"
 
 Appnima =
   key     : ""
-  protocol: "http"
+  protocol: "https"
   host    : "api.appnima.com"
-  port    : 80
+  port    : 443
 
   open: (connection) ->
     promise = new Hope.Promise()
@@ -68,7 +68,7 @@ Appnima =
       options.headers["Content-Type"] = "application/x-www-form-urlencoded"
       options.headers["Content-Length"] = body.length
 
-    client = http.request options, (response) =>
+    client = https.request options, (response) =>
       body = ""
       response.setEncoding "utf8"
       response.on "data", (chunk) -> body += chunk
