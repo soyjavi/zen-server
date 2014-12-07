@@ -20,6 +20,16 @@
     "name": "Javi Jimenez",
     "email": "javi@tapquo.com"
   },
+  "contributors": [
+    {
+      "name": "David Rey",
+      "email": "david.rey.acosta@gmail.com"
+    },
+    {
+      "name": "Catalina Oyaneder",
+      "email": "cat2608@gmail.com"
+    }
+  ],
   "dependencies": {
     "coffee-script": "*",
     "colors": "*",
@@ -30,7 +40,7 @@
     "mustache": "*",
     "redis": "*"
   },
-  "main": "./index.js",
+  "main": "./zen.proxy.js",
   "engines": {
     "node": "*"
   }
