@@ -27,7 +27,11 @@ module.exports =
     request.headers["user-agent"]?.toLowerCase()
 
   ip: (request) ->
-    request.headers["x-forwarded-for"]?.split(",")[0] or request.connection.remoteAddress
+    (
+      request.headers["x-forwarded-for"] or
+      request.connection.remoteAddress or
+      request.socket.remoteAddress or
+      request.connection.socket?.remoteAddress)
 
   required: (values, request, response) ->
     success = true
