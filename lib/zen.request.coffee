@@ -28,7 +28,7 @@ module.exports =
 
   ip: (request) ->
     (
-      request.headers["x-forwarded-for"] or
+      request.headers["x-forwarded-for"]?.split(",")[0] or
       request.connection.remoteAddress or
       request.socket.remoteAddress or
       request.connection.socket?.remoteAddress)
