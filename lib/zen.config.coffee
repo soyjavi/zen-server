@@ -20,6 +20,7 @@ module.exports = do ->
 
   # -- ZEN port ----------------------------------------------------------------
   ZEN.port = process.argv[4] if process.argv[4]?
+  ZEN.port = process.env.port if process.env.port?
 
   # -- ZEN timezone ------------------------------------------------------------
   process.env.TZ = ZEN.timezone if ZEN.timezone
