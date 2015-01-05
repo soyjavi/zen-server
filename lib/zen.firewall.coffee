@@ -42,7 +42,13 @@ module.exports = (request, response) ->
     if extension in (ZEN.firewall.extensions or [])
       valid = false
       response.run "", code = 403
-      # Add to blacklist request
+    # URL control
+    url = request.url
+    if url in  (ZEN.firewall.urls or [])
+      valid = false
+      response.run "", code = 403
+    # Add to blacklist request
+    if valid is false
       ZEN.blacklist[request.ip] = (ZEN.blacklist[request.ip] or 0) + 1
       fs.writeFile file_name, JSON.stringify(ZEN.blacklist, null, 0), "utf8"
 
