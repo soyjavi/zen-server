@@ -48,7 +48,7 @@ module.exports = (request, response) ->
       valid = false
       response.run "", code = 403
     # Add to blacklist request
-    if valid is false
+    if valid is false and request.ip isnt "127.0.0.1"
       ZEN.blacklist[request.ip] = (ZEN.blacklist[request.ip] or 0) + 1
       fs.writeFile file_name, JSON.stringify(ZEN.blacklist, null, 0), "utf8"
 
