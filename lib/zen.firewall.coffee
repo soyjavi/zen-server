@@ -22,7 +22,7 @@ module.exports = (request, response) ->
   # Blacklist block
   if ZEN.firewall?
     request.ip = zenrequest.ip request
-    if parseInt(ZEN.blacklist?[request.ip]) >= 10
+    if parseInt(ZEN.blacklist?[request.ip]) >= (ZEN.firewall.ip or 10)
       valid = false
       response.writeHead 403
       response.end()
