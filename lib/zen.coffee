@@ -100,7 +100,10 @@ module.exports =
                   request.connection.destroy()
               request.on "end", ->
                 if body isnt ""
-                  parameters[key] = value for key, value of querystring.parse body
+                  if request.headers["content-type"] is CONST.MIME.json
+                    parameters[key] = value for key, value of JSON.parse body
+                  else
+                    parameters[key] = value for key, value of querystring.parse body
                 request.parameters = __cast parameters
                 endpoint.callback request, response
             else
