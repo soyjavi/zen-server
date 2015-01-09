@@ -35,7 +35,7 @@ module.exports =
 
   required: (values, request, response) ->
     success = true
-    for name in values when not request.parameters[name]?
+    for name in values when not request.parameters[name]
       success = false
       response.json message: "#{name} is required", 400
       break
