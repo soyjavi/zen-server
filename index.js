@@ -11,6 +11,7 @@ module.exports = {
     // Facade
     Mongoose    : require("mongoose"),
     Hope        : require("hope"),
+    Mustache    : require("mustache"),
     // Instance
     start         : function() {
         return new Zen()
