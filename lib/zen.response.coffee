@@ -56,29 +56,25 @@ response =
     @run JSON.stringify(data, null, 0), code, "application/json", headers, audit
 
   # -- STATIC files ------------------------------------------------------------
-  file: (url, maxage = 60, if_modified = null) ->
+  file: (url, maxage = 60, last_modified = null) ->
     is_valid = false
     if fs.existsSync(url) and stat = fs.statSync(url)
       is_valid = true if stat?.isFile()
 
     if is_valid
       mime_type = CONST.MIME[path.extname(url)?.slice(1)] or CONST.MIME.html
-      last_modified = fs.statSync(url).mtime
-      if if_modified? and __time(last_modified) is __time(if_modified)
-        @run undefined, 304, mime_type
+      headers =
+        "Content-Type"  : mime_type
+        "Content-Length": stat.size
+        "Cache-Control" : "max-age=#{maxage.toString()}"
+        "Last-Modified" : last_modified
+      if mime_type.match(/audio|video/)?
+        @writeHead 200, headers
+        readableStream = fs.createReadStream url
+        readableStream.pipe @
+        __output @request, 200, mime_type
       else
-        headers =
-          "Content-Type"  : mime_type
-          "Content-Length": stat.size
-          "Cache-Control" : "max-age=#{maxage.toString()}"
-          "Last-Modified" : last_modified
-        if mime_type.match(/audio|video/)?
-          @writeHead 200, headers
-          readableStream = fs.createReadStream url
-          readableStream.pipe @
-          __output @request, 200, mime_type
-        else
-          fs.readFile url, (error, result) => @run result, 200, mime_type, headers
+        fs.readFile url, (error, result) => @run result, 200, mime_type, headers
     else
       @page "404", undefined, undefined, 404
 
@@ -143,6 +139,3 @@ __output = (request, code, type = "", body = "", audit = true) ->
       type  : type
       ms    : latence
       size  : body?.length
-
-__time = (value) -> (new Date(value)).getTime()
-
