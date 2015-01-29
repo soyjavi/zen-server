@@ -44,6 +44,7 @@ module.exports =
         ZEN.br()
         console.log " Listening at :#{ZEN.port}", "(CTRL + C to shutdown)".grey
         ZEN.br()
+        @
 
     createEndpoints: ->
       @methods = {}
@@ -68,7 +69,7 @@ module.exports =
 
     createServer: ->
       @server = __server()
-      @server.on "request", (request, response) =>
+      @server.on "request", (request, response, next) =>
 
         ZEN.domain = domain.create()
         ZEN.domain.add request
@@ -98,22 +99,24 @@ module.exports =
                   body = ""
                   response.run "", 413, "text/plain"
                   request.connection.destroy()
-              request.on "end", ->
+              request.on "end", =>
                 if body isnt ""
                   if request.headers["content-type"] is CONST.MIME.json
                     parameters[key] = value for key, value of JSON.parse body
                   else
                     parameters[key] = value for key, value of querystring.parse body
                 request.parameters = __cast parameters
-                endpoint.callback request, response
+
+                step.apply @, [request, response, next] for step in @middleware
+                endpoint.callback.apply @, [request, response, next]
             else
               form = new formidable.IncomingForm
                 multiples     : true
                 keepExtensions: true
-              form.parse request, (error, parameters, files) ->
+              form.parse request, (error, parameters, files) =>
                 parameters = zenrequest.multipart error, parameters, files
                 request.parameters = __cast parameters
-                endpoint.callback request, response
+                endpoint.callback.apply @, [request, response]
           else
             response.page "404", undefined, undefined, 404
 
@@ -121,6 +124,10 @@ module.exports =
       @server.listen ZEN.port
       do @handleProcess
       @server
+
+    use: (callback) =>
+      @middleware = @middleware or []
+      @middleware.push callback
 
     handleProcess: ->
       process.on "uncaughtException", (error) =>
