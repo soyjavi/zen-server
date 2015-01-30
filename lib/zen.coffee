@@ -17,14 +17,17 @@ os            = require "os"
 path          = require "path"
 querystring   = require "querystring"
 url           = require "url"
-
 ZEN           = require "./zen.config"
 CONST         = require "./zen.constants"
-zenfirewall   = require "./zen.firewall"
-zenrequest    = require "./zen.request"
-appnima       = require "./services/appnima"
-mongo         = require "./services/mongo"
-redis         = require "./services/redis"
+# -- Services
+appnima       = require "./services/appnima" if ZEN.appnima?
+mongo         = require "./services/mongo" if ZEN.mongo?
+redis         = require "./services/redis" if ZEN.redis?
+# -- Middlewares
+request       = require "./middlewares/request"
+firewall      = require "./middlewares/firewall" if ZEN.firewall?
+response      = require "./middlewares/response"
+cors          = require "./middlewares/cors"
 
 module.exports =
   class ZenServer
@@ -46,7 +49,17 @@ module.exports =
         ZEN.br()
         @
 
+    use: (callback) =>
+      @middleware = @middleware or []
+      @middleware.push callback
+
     createEndpoints: ->
+      @use request
+      @use firewall.blacklist if ZEN.firewall?
+      @use response
+      @use firewall.extensions if ZEN.firewall?
+      @use cors
+
       @methods = {}
       CONST.HTTP_METHODS.forEach (method) =>
         @methods[method] = []
@@ -70,7 +83,6 @@ module.exports =
     createServer: ->
       @server = __server()
       @server.on "request", (request, response, next) =>
-
         ZEN.domain = domain.create()
         ZEN.domain.add request
         ZEN.domain.add response
@@ -78,56 +90,51 @@ module.exports =
           __errorStack error
           response.internalServerError()
 
-        if zenfirewall request, response
-          body = ""
-          parameters = {}
-          match = undefined
-          for endpoint in @methods[request.method]
-            match = endpoint.pattern.exec url.parse(request.url).pathname
-            if match
-              parameters[endpoint.parameters[i]] = value for value, i in match.slice(1)
-              break
+        for use in @middleware when not response.headersSent
+          use.apply @, [request, response, next]
 
+        body = ""
+        parameters = {}
+        match = undefined
+
+        for endpoint in @methods[request.method]
+          match = endpoint.pattern.exec url.parse(request.url).pathname
           if match
-            request.required = (values = []) -> zenrequest.required values, request, response
+            parameters[endpoint.parameters[i]] = value for value, i in match.slice(1)
+            break
 
-            parameters[key] = value for key, value of url.parse(request.url, true).query
-            unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
-              request.on "data", (chunk) ->
-                body += chunk.toString()
-                if body.length > 1e6
-                  body = ""
-                  response.run "", 413, "text/plain"
-                  request.connection.destroy()
-              request.on "end", =>
-                if body isnt ""
-                  if request.headers["content-type"] is CONST.MIME.json
-                    parameters[key] = value for key, value of JSON.parse body
-                  else
-                    parameters[key] = value for key, value of querystring.parse body
-                request.parameters = __cast parameters
-
-                step.apply @, [request, response, next] for step in @middleware
-                endpoint.callback.apply @, [request, response, next]
-            else
-              form = new formidable.IncomingForm
-                multiples     : true
-                keepExtensions: true
-              form.parse request, (error, parameters, files) =>
-                parameters = zenrequest.multipart error, parameters, files
-                request.parameters = __cast parameters
-                endpoint.callback.apply @, [request, response]
+        if match
+          parameters[key] = value for key, value of url.parse(request.url, true).query
+          unless request.headers["content-type"]?.match(CONST.REGEXP.MULTIPART)?
+            request.on "data", (chunk) ->
+              body += chunk.toString()
+              if body.length > 1e6
+                body = ""
+                response.run "", 413, "text/plain"
+                request.connection.destroy()
+            request.on "end", =>
+              if body isnt ""
+                if request.headers["content-type"] is CONST.MIME.json
+                  parameters[key] = value for key, value of JSON.parse body
+                else
+                  parameters[key] = value for key, value of querystring.parse body
+              request.parameters = __cast parameters
+              endpoint.callback.apply @, [request, response, next]
           else
-            response.page "404", undefined, undefined, 404
+            form = new formidable.IncomingForm
+              multiples     : true
+              keepExtensions: true
+            form.parse request, (error, parameters, files) =>
+              parameters = request.multipart error, parameters, files
+              request.parameters = __cast parameters
+              endpoint.callback.apply @, [request, response, next]
+        else
+          response.page "404", undefined, undefined, 404
 
       @server.timeout = ZEN.timeout or CONST.TIMEOUT
       @server.listen ZEN.port
       do @handleProcess
       @server
-
-    use: (callback) =>
-      @middleware = @middleware or []
-      @middleware.push callback
 
     handleProcess: ->
       process.on "uncaughtException", (error) =>
@@ -255,7 +262,7 @@ __monitorProcess = ->
 
 __errorStack = (error) ->
   console.log(" ⚑ [uncaughtException]".red, new Date().toString().grey,
-    "\n   #{error.message.toUpperCase()}".red,
+    "\n   #{error.message}".red,
     "\n  ", error.stack)
   file_name = "#{__dirname}/../../../zen.error.json"
   error =

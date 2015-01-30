@@ -1,21 +1,34 @@
 "use strict"
 
+path      = require "path"
+ZEN       = require "../zen.config"
+CONST     = require "../zen.constants"
+# -- Required via middleware
 colors    = require "colors"
 fs        = require "fs"
 mustache  = require "mustache"
 path      = require "path"
 url       = require "url"
-zlib      = require "zlib"
-
-CONST     = require "./zen.constants"
-
+# zlib      = require "zlib" #@TODO: Response with gzip
 if ZEN.monitor
-  Monitor = require("./zen.monitor")
+  Monitor = require("../zen.monitor")
   monitor = new Monitor("request", ZEN.monitor.request)
 
-response =
+module.exports = (request, response, next) ->
+  response.request =
+    url     : request.url
+    method  : request.method
+    ip      : request.ip
+    session : request.session
+    agent   : request.agent
+    mobile  : request.mobile
+    at      : new Date()
+  response[method] = callback for method, callback of middleware
+  response.setTimeout ZEN.timeout, -> response.requestTimeout()
 
-  # -- Session -----------------------------------------------------------------
+
+# -- Middleware ----------------------------------------------------------------
+middleware =
   session: (value) ->
     @setHeader "Set-Cookie", __cookie value
 
@@ -23,7 +36,6 @@ response =
     @setHeader "Set-Cookie", __cookie null
     delete @request.session
 
-  # -- Common responses ---------------------------------------------------------
   run: (body = "", code = 200, type = "application/json", headers = {}, audit = true) ->
     if not @headersSent
       length = if Buffer.isBuffer(body) then body.length else Buffer.byteLength body
@@ -39,7 +51,6 @@ response =
     @end()
     __output @request, 302
 
-  # -- HTML responses ----------------------------------------------------------
   html: (value, body, headers = {}) ->
     @run value.toString(), body, "text/html", headers
 
@@ -49,13 +60,11 @@ response =
     bindings.zen = global.ZEN
     @html mustache.render(__mustache(file), bindings, files), code
 
-  # -- JSON responses ----------------------------------------------------------
   json: (data = {}, code, headers = {}, audit = true) ->
     for key, value of global.ZEN.headers when not headers[key]
       headers[key] =  if Array.isArray(value) then value.join(",") else value
     @run JSON.stringify(data, null, 0), code, "application/json", headers, audit
 
-  # -- STATIC files ------------------------------------------------------------
   file: (url, maxage = 60, last_modified = null) ->
     is_valid = false
     if fs.existsSync(url) and stat = fs.statSync(url)
@@ -79,13 +88,9 @@ response =
       @page "404", undefined, undefined, 404
 
 for code, status of CONST.STATUS
-  do (status, code) -> response[status] = -> @json message: status, code
-
-module.exports = response
+  do (status, code) -> middleware[status] = -> @json message: status, code
 
 # -- Private methods -----------------------------------------------------------
-__cachedMustache = {}
-
 __cookie = (value) ->
   key = global.ZEN.session.cookie
   if value?
@@ -100,8 +105,9 @@ __cookie = (value) ->
   cookie += "; Secure=true" if ZEN.protocol is "https"
   cookie
 
+__cachedMustache = {}
 __mustache = (name) ->
-  dir = "#{__dirname}/../../../www/mustache/"
+  dir = "#{__dirname}/../../../../www/mustache/"
   if __cachedMustache[name] and (global.ZEN.mustache?.cache or not global.ZEN.mustache)
     __cachedMustache[name]
   else if fs.existsSync file = "#{dir}#{name}.mustache"

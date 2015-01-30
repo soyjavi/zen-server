@@ -1,9 +1,16 @@
 "use strict"
 
-CONST    = require "./zen.constants"
+path          = require "path"
+ZEN           = require "../zen.config"
+CONST         = require "../zen.constants"
 
-module.exports =
+module.exports = (request, response, next) ->
+  request[key] = method request for key, method of middleware
+  request.required = (values = []) -> _required values, request, response
+  request.multipart = _multipart
 
+# -- Middleware ----------------------------------------------------------------
+middleware =
   session: (request)->
     session = undefined
     key = global.ZEN.session?.authorization
@@ -33,15 +40,8 @@ module.exports =
       request.socket.remoteAddress or
       request.connection.socket?.remoteAddress)
 
-  required: (values, request, response) ->
-    success = true
-    for name in values when not request.parameters[name]
-      success = false
-      response.json message: "#{name} is required", 400
-      break
-    success
-
-  multipart: (error, parameters, files) ->
+# -- Private methods -----------------------------------------------------------
+_multipart = (error, parameters, files) ->
     for field, values of files
       if Array.isArray(values)
         parameters[field] = (_file(value) for value in values when value.size > 0)
@@ -49,10 +49,16 @@ module.exports =
         parameters[field] = _file(values)
     parameters
 
+_required = (values, request, response) ->
+    success = true
+    for name in values when not request.parameters[name]
+      success = false
+      response.json message: "#{name} is required", 400
+      break
+    success
+
 _file = (data) ->
-  return {
-    name: data.name
-    type: data.type
-    path: data.path
-    size: data.size
-  }
+  name: data.name
+  type: data.type
+  path: data.path
+  size: data.size
