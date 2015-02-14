@@ -328,10 +328,10 @@ Obtendríamos automáticamente:
 
 ```json
 {
-    id      : "soyjavi",
-    context : "messages",
-    order_by: "date",
-    page    : 20
+    "id"      : "soyjavi",
+    "context" : "messages",
+    "order_by": "date",
+    "page"    : 20
 }
 ```
 
