@@ -57,6 +57,9 @@ middleware =
   page: (file, bindings = {}, partials = [], code, headers = {}) ->
     files = {}
     files[partial] = __mustache partial for partial in partials or []
+    bindings.if = {}
+    bindings.if[key] = (value? and not value is false) for key, value of bindings
+    delete bindings.if.if
     bindings.zen = global.ZEN
     @html mustache.render(__mustache(file), bindings, files), code
 
