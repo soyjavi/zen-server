@@ -9,23 +9,23 @@ fs        = require "fs"
 mustache  = require "mustache"
 path      = require "path"
 url       = require "url"
-# zlib      = require "zlib" #@TODO: Response with gzip
+zlib      = require "zlib"
 if ZEN.monitor
   Monitor = require("../zen.monitor")
   monitor = new Monitor("request", ZEN.monitor.request)
 
 module.exports = (request, response, next) ->
   response.request =
-    url     : request.url
-    method  : request.method
-    ip      : request.ip
-    session : request.session
-    agent   : request.agent
-    mobile  : request.mobile
-    at      : new Date()
+    url       : request.url
+    method    : request.method
+    ip        : request.ip
+    session   : request.session
+    agent     : request.agent
+    mobile    : request.mobile
+    encoding  : request.headers["accept-encoding"]
+    at        : new Date()
   response[method] = callback for method, callback of middleware
   response.setTimeout ZEN.timeout, -> response.requestTimeout()
-
 
 # -- Middleware ----------------------------------------------------------------
 middleware =
@@ -74,19 +74,25 @@ middleware =
       is_valid = true if stat?.isFile()
 
     if is_valid
+      raw = fs.createReadStream url
       mime_type = CONST.MIME[path.extname(url)?.slice(1)] or CONST.MIME.html
       headers =
         "Content-Type"  : mime_type
         "Content-Length": stat.size
         "Cache-Control" : "max-age=#{maxage.toString()}"
         "Last-Modified" : last_modified
-      if mime_type.match(/audio|video/)?
-        @writeHead 200, headers
-        readableStream = fs.createReadStream url
-        readableStream.pipe @
-        __output @request, 200, mime_type
+      if @request.encoding.match(/\bdeflate\b/)
+        headers["content-encoding"] = "deflate"
+        @.writeHead 200, headers
+        raw.pipe(zlib.createDeflate()).pipe @
+      else if @request.encoding.match(/\bgzip\b/)
+        headers["content-encoding"] = "gzip"
+        @.writeHead 200, headers
+        raw.pipe(zlib.createGzip()).pipe @
       else
-        fs.readFile url, (error, result) => @run result, 200, mime_type, headers
+        @.writeHead 200, headers
+        raw.pipe @
+      __output @request, 200, mime_type
     else
       @page "404", undefined, undefined, 404
 
