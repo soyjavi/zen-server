@@ -1,6 +1,6 @@
 {
   "name": "zenserver",
-  "version": "1.1.26",
+  "version": "1.2.17",
   "description": "a lean and mean http router for node.js",
   "homepage": "https://github.com/soyjavi/zenproxy",
   "keywords": [
@@ -22,12 +22,12 @@
   },
   "contributors": [
     {
-      "name": "David Rey",
-      "email": "david.rey.acosta@gmail.com"
-    },
-    {
       "name": "Catalina Oyaneder",
       "email": "cat2608@gmail.com"
+    },
+    {
+      "name": "David Rey",
+      "email": "david.rey.acosta@gmail.com"
     }
   ],
   "dependencies": {
