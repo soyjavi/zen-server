@@ -25,7 +25,7 @@ module.exports = (request, response, next) ->
     encoding  : request.headers["accept-encoding"]
     at        : new Date()
   response[method] = callback for method, callback of middleware
-  response.setTimeout ZEN.timeout, -> response.requestTimeout()
+  response.setTimeout (ZEN.timeout or CONST.TIMEOUT), -> response.requestTimeout()
 
 # -- Middleware ----------------------------------------------------------------
 middleware =
