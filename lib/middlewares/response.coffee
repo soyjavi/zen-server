@@ -78,19 +78,18 @@ middleware =
       mime_type = CONST.MIME[path.extname(url)?.slice(1)] or CONST.MIME.html
       headers =
         "Content-Type"  : mime_type
-        "Content-Length": stat.size
         "Cache-Control" : "max-age=#{maxage.toString()}"
         "Last-Modified" : last_modified
-      if @request.encoding.match(/\bdeflate\b/)
+      if @request.encoding?.match(/\bdeflate\b/)
         headers["content-encoding"] = "deflate"
-        @.writeHead 200, headers
+        @writeHead 200, headers
         raw.pipe(zlib.createDeflate()).pipe @
-      else if @request.encoding.match(/\bgzip\b/)
+      else if @request.encoding?.match(/\bgzip\b/)
         headers["content-encoding"] = "gzip"
-        @.writeHead 200, headers
+        @writeHead 200, headers
         raw.pipe(zlib.createGzip()).pipe @
       else
-        @.writeHead 200, headers
+        @writeHead 200, headers
         raw.pipe @
       __output @request, 200, mime_type
     else
