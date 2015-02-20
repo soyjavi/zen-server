@@ -48,10 +48,28 @@ puedes descargarte el libro gratuito [CoffeeScript][1].
 
 ### 1.2 Configuración
 
-Uno de los beneficios de usar ZEN es que el fichero de configuración (`zen.yml`)
-cobra una gran importancia a la hora de configurar los servicios disponibles en
-tu *server*. Vamos a ir analizando cada una de las opciones que nos permite
-establecer el fichero `zen.yml`:
+ZENserver busca ofrecer todo lo necesario para crear aplicación robustas y mantenibles teniendo como escencia JavaScript desde el cliente hasta el servidor.
+
+Así, pasaremos a describir los servicios que ofrece ZENserver desde las bases de datos como **MongoDB** y **Redis** hasta directivas de firewall además de métodos para controlar las peticiones y respuestas del servidor.
+
+Asimismo, ZENserver viene también con un conector con [Appnima](https://github.com/tapquo/appnima.docs) por si quisiseras utilizar esta plataforma en forma de API REST que te provee de los servicios lógicos para tu proyecto.
+
+Teniendo en cuenta lo comentado anteriormente, la estructura básica de ficheros y directorios para trabajar con ZENserver y sus servicios es la que se muestra a continuación:
+
+```
+.
+├── api
+├── common
+│   └── models
+├── environment
+├── www
+│   └── index.html
+├── package.json
+├── zen.js
+├── zen.yml
+```
+
+Uno de los beneficios de usar ZEN es que el fichero de configuración (`zen.yml`) cobra una gran importancia a la hora de configurar los servicios disponibles en tu *server*. Vamos a ir analizando cada una de las opciones que nos permite establecer el fichero `zen.yml`:
 
 ```yaml
 protocol: http # or https
@@ -60,37 +78,28 @@ port    : 8888
 timezone: Europe/Amsterdam
 ```
 
-Esta sección te permite establecer la configuración de tu servidor; el
-**protocolo** que vas a utilizar (`http` o `https`), el **nombre** del host,
-**puerto** y **zona horaria**.
+Esta sección te permite establecer la configuración de tu servidor; el **protocolo** que vas a utilizar (`http` o `https`), el **nombre** del host, **puerto** y **zona horaria**.
 
 ```yaml
 environment: development
 ```
 
-El atributo **environment** sirve para crear diferentes ficheros de
-configuración por ejemplo para utilizarlo en diferentes entornos (desarrollo,
-preproducción, producción...). En este caso, como hemos establecido el valor
-`development`, cuando arranques el servidor, éste buscará un fichero en la ruta
-*environments/development.yml* para sobreescribir los atributos que tengas
-establecidos en el fichero */zen.yml*.
+El atributo **environment** sirve para crear diferentes ficheros de configuración por ejemplo para utilizarlo en diferentes entornos (desarrollo, preproducción, producción...). En este caso, como hemos establecido el valor `development`, cuando arranques el servidor, éste buscará un fichero en la ruta *environment/development.yml* para sobreescribir los atributos que tengas establecidos en el fichero */zen.yml*.
 
 ```yaml
+# -- RESTful services ----------------------------------------------------------
 api:
   - index
 
+# -- HTML pages ----------------------------------------------------------------
 www:
   - index
 ```
 
-Los atributos **api** y **www** contienen los *endpoints* de tu servidor. Estos
-podrán ser de dos tipos; `api` para los servicios REST y *www* para el resto de
-resultados (HTML, images...). En este ejemplo, ZENserver buscará los endpoints
-`/api/index.coffee` y `/www/index.coffee` y los cargará en el enrutador para su
-posterior tratamiento. En el capítulo 2 veremos como se crean los endpoints y
-las diferentes posibilidades que nos ofrece.
+Los atributos **api** y **www** contienen los *endpoints* de tu servidor. Estos podrán ser de dos tipos; `api` para los servicios REST y *www* para el resto de resultados (HTML, images...). En este ejemplo, ZENserver buscará los endpoints `/api/index.coffee` y `/www/index.coffee` y los cargará en el enrutador para su posterior tratamiento. En el capítulo 2 veremos como se crean los endpoints y las diferentes posibilidades que nos ofrece.
 
 ```yaml
+# -- Static resources ----------------------------------------------------------
 statics:
   - url     : /temp/resources
     folder  : /static
@@ -104,15 +113,10 @@ statics:
     folder  : /static
 ```
 
-El atributo **statics** nos ofrece una forma sencilla de ofrecer ficheros
-estáticos en nuestro servidor. Podemos ofrecer directorios completos por medio
-del atributo `url` o un fichero determinado mediante `file`. Para ambos casos
-debemos establecer la ruta relativa al directorio del proyecto mediante el
-atributo `folder`. En el caso de que necesitemos que los recursos tenga *caché*
-simplemente tenemos que establecer el número de segundos mediante el atributo
-condicional `maxage`.
+El atributo **statics** nos ofrece una forma sencilla de ofrecer ficheros estáticos en nuestro servidor. Podemos ofrecer directorios completos por medio del atributo `url` o un fichero determinado mediante `file`. Para ambos casos debemos establecer la ruta relativa al directorio del proyecto mediante el atributo `folder`. En el caso de que necesitemos que los recursos tenga *caché* simplemente tenemos que establecer el número de segundos mediante el atributo condicional `maxage`.
 
 ```yaml
+# -- session -------------------------------------------------------------------
 session:
   # Cookie Request
   cookie: zencookie
@@ -123,22 +127,17 @@ session:
   authorization: zenauth
 ```
 
-El atributo **session** nos permite establecer y obtener de una manera sencilla
-la variable de sesión de un determinado cliente. Esta variable se puede obtener
-mediante el atributo **cookie**, al cual se le asigna un nombre, el **dominio**
-para el cual es válida la cookie, **ruta** y **expiración**. **session** también
-nos permite que la asignación sea por cabecera en una petición http. En este
-ejemplo, ese atributo tiene el valor `zenauth`.
+El atributo **session** nos permite establecer y obtener de una manera sencilla la variable de sesión de un determinado cliente. Esta variable se puede obtener mediante el atributo **cookie**, al cual se le asigna un nombre, el **dominio** para el cual es válida la cookie, **ruta** y **expiración**. **session** también nos permite que la asignación sea por cabecera en una petición http. En este ejemplo, ese atributo tiene el valor `zenauth`.
 
 ```yaml
-audit:
-  interval: 60000 #miliseconds
+# -- Monitor -------------------------------------------------------------------
+monitor:
+  password: my_P4ssw0rd
+  process : 10000
+  request : 1000
 ```
 
-El atributo **audit** nos permite que ZENserver cree una pequeña auditoria de lo
-que sucede en nuestro servidor mientras se está ejecutando. Genera un fichero
-por día en el directorio */logs* con información de todas las peticiones que le
-llegan al servidor. Por cada petición obtenemos los siguientes datos:
+El atributo **monitor** nos permite que ZENserver cree una pequeña auditoria de lo que sucede en nuestro servidor mientras se está ejecutando. Genera un fichero por día en el directorio */logs* con información de todas las peticiones que le llegan al servidor. Por cada petición obtenemos los siguientes datos:
 
 -   Endpoint que se esta solicitando.
 -   Método (GET, POST, PUT, DELETE,...).
@@ -147,14 +146,13 @@ llegan al servidor. Por cada petición obtenemos los siguientes datos:
 -   Tamaño de respuesta en bytes.
 -   Cliente (próximamente).
 
-De esta manera podrás analizar como están usando los usuarios tu servidor e
-incluso poder identificar *errores*, *bottlenecks* o puntos de mejora. En el
-caso de que queramos auditar nuestro servidor únicamente tenemos que establecer
-el atributo interval con el número de milisegundos que queremos que tenga en
-memoria los datos (antes de volcar en el fichero de logs). Esto es así para no
-sobrecargar el número de escrituras en disco.
+![image](https://raw.githubusercontent.com/cat2608/contacts/master/assets/img/screen-18.png)
+
+De esta manera podrás analizar como están usando los usuarios tu servidor e incluso poder identificar *errores*, *bottlenecks* o puntos de mejora. [Aquí](https://github.com/soyjavi/zen-monitor) puedes encontrar más información sobre como leer los datos de la auditoría.
+
 
 ```yaml
+# -- CORS Properties -----------------------------------------------------------
 headers:
   Access-Control-Allow-Origin: "*"
   Access-Control-Allow-Credentials: true
