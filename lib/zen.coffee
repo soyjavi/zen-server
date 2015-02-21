@@ -55,10 +55,10 @@ module.exports =
 
     createEndpoints: ->
       @use request
-      @use firewall.blacklist if ZEN.firewall?
       @use response
-      @use firewall.extensions if ZEN.firewall?
       @use cors
+      @use firewall.blacklist if ZEN.firewall?
+      @use firewall.extensions if ZEN.firewall?
 
       @methods = {}
       CONST.HTTP_METHODS.forEach (method) =>

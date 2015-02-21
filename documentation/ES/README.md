@@ -52,7 +52,7 @@ ZENserver busca ofrecer todo lo necesario para crear aplicación robustas y mant
 
 Así, pasaremos a describir los servicios que ofrece ZENserver desde las bases de datos como **MongoDB** y **Redis** hasta directivas de firewall además de métodos para controlar las peticiones y respuestas del servidor.
 
-Asimismo, ZENserver viene también con un conector con [Appnima](https://github.com/tapquo/appnima.docs) por si quisiseras utilizar esta plataforma en forma de API REST que te provee de los servicios lógicos para tu proyecto.
+Asimismo, ZENserver viene también con un conector con [Appnima](https://github.com/tapquo/appnima.docs) por si quisieras utilizar esta plataforma en forma de API REST que te provee de los servicios lógicos para tu proyecto.
 
 Teniendo en cuenta lo comentado anteriormente, la estructura básica de ficheros y directorios para trabajar con ZENserver y sus servicios es la que se muestra a continuación:
 
@@ -132,7 +132,7 @@ El atributo **session** nos permite establecer y obtener de una manera sencilla 
 ```yaml
 # -- Monitor -------------------------------------------------------------------
 monitor:
-  password: my_P4ssw0rd
+  password: mypassword
   process : 10000
   request : 1000
 ```
@@ -150,6 +150,16 @@ El atributo **monitor** nos permite que ZENserver cree una pequeña auditoria de
 
 De esta manera podrás analizar como están usando los usuarios tu servidor e incluso poder identificar *errores*, *bottlenecks* o puntos de mejora. [Aquí](https://github.com/soyjavi/zen-monitor) puedes encontrar más información sobre como leer los datos de la auditoría.
 
+```yaml
+# -- firewall ------------------------------------------------------------------
+firewall:
+  ip: 100 #Number of request per firewall rule
+  extensions:
+    - php
+    - sql
+```
+
+Gracias al atributo **firewall** podemos filtrar peticiones entrantes a nuestro server. Declara las extensiones que tu aplicación no esté configurada para servir y ZENserver se encargará de devolver un `403`. Además, si configuras el parámetro `ip`, los hosts que hagan el número de peticiones indicado serán puestos en la `blacklist.json` para que puedas analizarlo después.
 
 ```yaml
 # -- CORS Properties -----------------------------------------------------------
