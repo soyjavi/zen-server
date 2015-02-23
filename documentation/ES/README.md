@@ -9,9 +9,31 @@ en proyectos NodeJS pero que a la larga, puede ofrecer problemas.
 Nuestro compromiso es utilizar el menor número de dependencias y ofrecer nuestra
 experiencia con NodeJS de una manera sencilla e intuitiva.
 
+- [Inicio](#a.1)
+  - [Instalación](#a.1.1)
+  - [Configuración](#a.1.2)
+  - [Servidor HTTPS](#a.1.3)
+  - [Commands](#a.1.4)
+- [Servidor API](#a.2)
+  - [Nuestro primer *API* endpoint](#a.2.1)
+  - [URLs](#a.2.2)
+  - [Parámetros](#a.2.3)
+  - [Control de sesión](#a.2.4)
+  - [HTTP Status Messages](#a.2.5)
+- [Servidor Páginas](#a.3)
+  - [Nuestro primer *WWW* endpoint](#a.3.1)
+  - [Plantillas Mustache](#a.3.2)
+  - [Bindings](#a.3.3)
+  - [Bloques](#a.3.4)
+  - [Redirecciones](#a.3.5)
+  - [Servir ficheros y streming](#a.3.6)
+
+
+<a name="a.1"/>
 1. Inicio
 ---------
 
+<a name="a.1.1"/>
 ### 1.1 Instalación
 
 Para instalar una nueva instancia de ZENserver únicamente tienes que ejecutar el
@@ -46,6 +68,7 @@ puedes descargarte el libro gratuito [CoffeeScript][1].
 
 [1]: <https://leanpub.com/coffeescript>
 
+<a name="a.1.2"/>
 ### 1.2 Configuración
 
 ZENserver busca ofrecer todo lo necesario para crear aplicación robustas y mantenibles teniendo como escencia JavaScript desde el cliente hasta el servidor. Así, pasaremos a describir los servicios que ofrece ZENserver desde las bases de datos como **MongoDB** y **Redis** hasta directivas de firewall además de métodos para controlar las peticiones y respuestas del servidor.
@@ -188,7 +211,8 @@ headers:
 
 Por último, podemos establecer el tipo de respuesta de nuestros *endpoints*, pudiendo limitar el acceso a los mismos con los típicos parámetros para el control *cross-origin*, filtrado de métodos, etc... Recuerda que si en el apartado de *session* decides cambiar el nombre del parámetro de autorización (`authorization`), deberás reflejar este cambio en el CORS (`Authorization`).
 
-### 1.3 Servidor HTTPs
+<a name="a.1.3"/>
+### 1.3 Servidor HTTPS
 ZENserver también permite trabajar como servidor HTTPS. Las modificaciones en nuestro fichero de configuración son mínimas; debemos indicar que el protocolo es **https** y los nombre de los fichero de autenticación:
 
 ```yaml
@@ -203,9 +227,10 @@ cert: server.crt
 key : server.key
 ```
 
-Estos ficheros los debes almacenar en la carpeta **certificates** en la raíz del proyecto. Una vez tengas todo configurado, solo tienes que levantar el servidor como siempre pero ahora la url es bajo HTTPS: `https://127.0.0.1:8888`
+Estos ficheros los debes almacenar en la carpeta **certificates** en la raíz del proyecto. Una vez tengas todo configurado, solo tienes que levantar el servidor como siempre pero ahora la url es: `https://127.0.0.1:8888`.
 
 
+<a name="a.1.4"/>
 ### 1.4 Commands
 
 Como has podido comprobar el fichero de configuración `zen.yml` te permite
@@ -247,6 +272,7 @@ Señalar que no es obligatorio tener que asignar todos los parámetros pero si
 respetar el orden de los mismos. Con esto, en el caso de que queramos asignar un
 nuevo número de puerto, es necesario pasar los argumentos anteriores.
 
+<a name="a.2"/>
 2. Servidor API
 ---------------
 
@@ -254,6 +280,7 @@ En esa sección aprenderás a crear tu primera API con las diferentes
 funcionalidades y capacidades que te ofrece ZENserver. Como vimos en el capítulo
 1, los endpoints de tipo API debemos alojarlos en la carpeta */api*.
 
+<a name="a.2.1"/>
 ### 2.1 Nuestro primer *API* endpoint
 
 Vamos a crear nuestro primer API endpoint para ello vamos a crear un fichero
@@ -315,6 +342,7 @@ module.exports = (zen) ->
 El resto de métodos están en la ruta `/api` y devuelven como respuesta otro
 objeto json con el tipo de método como valor.
 
+<a name="a.2.2"/>
 ### 2.2 URLs
 
 En el caso de que necesitemos tener URLs condicionales y que sean manejadas por
@@ -335,6 +363,7 @@ Como vemos, devolvemos como respuesta un objeto json contenido en
 tratamiento de parámetros, pero como adelanto, este método devolvería: `{id:
 "soyjavi", context: "messages"}` y `{id: "cataflu", context: "followers"}`
 
+<a name="a.2.3"/>
 ### 2.3 Parámetros
 
 Si continuamos con el endpoint anterior `/user/:id/:context` vamos a realizar
@@ -371,6 +400,7 @@ Si el parámetro `"name"` no fuese enviado, ZENserver devolverá una respuesta c
 código *httpstatus* `400` indicando que el parámetro no ha sido encontrado:
 `{message: "name is required."}`
 
+<a name="a.2.4"/>
 ### 2.4 Control de sesión
 
 En el caso de que queramos controlar si las peticiones que llegan a nuestro
@@ -412,6 +442,7 @@ zen.get "/domain/:id/:context", (request, response) ->
     response.json request.parameters
 ```
 
+<a name="a.2.5"/>
 ### 2.5 HTTP Status Messages
 
 Por ahora solo conocemos el método json de manera superficial, además de
@@ -472,6 +503,7 @@ ZENserver:
 505: "HTTPVersionNotSupported"
 ```
 
+<a name="a.3"/>
 3. Servidor Páginas
 -------------------
 
@@ -479,6 +511,7 @@ Como hemos aprendido en el capítulo anterior ZENserver nos da todos los
 mecanismos necesarios para crear potentes APIs. En este apartado veremos de
 igual manera lo realmente sencillo que es crear páginas webs.
 
+<a name="a.3.1"/>
 ### 3.1 Nuestro primer *WWW* endpoint
 
 Vamos a crear un fichero form.coffee en el directorio */www* el cual contendrá
@@ -513,6 +546,7 @@ Al igual que en el resto de endpoints aquí también podemos tratar los parametr
 de la request. ZENserver te abstrae de la captura de parametros
 independientemente del tipo que sean: get, post, multipart...
 
+<a name="a.3.2"/>
 ### 3.2 Plantillas Mustache
 
 Ya has aprendido como devolver código HTML en un determinado endpoint, pero
@@ -558,6 +592,7 @@ puesto que ZENserver buscará un fichero `404.mustache` en el mismo directorio
 para mostrar una página de error html, si a su vez este fichero tampoco
 existiera, ZENserver devolverá un html `<h1> 404 - Not found</h1>`.
 
+<a name="a.3.3"/>
 ### 3.3 Bindings
 
 En el anterior capítulo hemos visto como renderizar una página sencilla por
@@ -594,6 +629,7 @@ a la documentación de [Mustache][3].
 
 [3]: <http://mustache.github.io/>
 
+<a name="a.3.4"/>
 ### 3.4 Bloques
 
 Imagina que vamos a utilizar una sección de HTML en varias páginas, lo mejor
@@ -663,6 +699,7 @@ zen.get "/", (request, response, next) ->
   response.page "base", bindings, partials
 ```
 
+<a name="a.3.5"/>
 ### 3.5 Redirecciones
 
 En el caso de que cuando se acceda a un endpoint necesites dar como respuesta
@@ -683,6 +720,7 @@ tener sesión (ya sea por cookie o HTTPAuthentication), en caso de que no la
 tenga utilizaremos el método `response.redirect` para redirigirle al endpoint
 */login*.
 
+<a name="a.3.6"/>
 ### 3.6 Servir ficheros y streaming
 
 A pesar de que NodeJS no es el mejor sistema para servir archivos estáticos
