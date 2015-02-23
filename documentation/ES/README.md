@@ -48,13 +48,11 @@ puedes descargarte el libro gratuito [CoffeeScript][1].
 
 ### 1.2 Configuración
 
-ZENserver busca ofrecer todo lo necesario para crear aplicación robustas y mantenibles teniendo como escencia JavaScript desde el cliente hasta el servidor.
+ZENserver busca ofrecer todo lo necesario para crear aplicación robustas y mantenibles teniendo como escencia JavaScript desde el cliente hasta el servidor. Así, pasaremos a describir los servicios que ofrece ZENserver desde las bases de datos como **MongoDB** y **Redis** hasta directivas de firewall además de métodos para controlar las peticiones y respuestas del servidor.
 
-Así, pasaremos a describir los servicios que ofrece ZENserver desde las bases de datos como **MongoDB** y **Redis** hasta directivas de firewall además de métodos para controlar las peticiones y respuestas del servidor.
+Además, ZENserver ofrece un conector con [Appnima](https://github.com/tapquo/appnima.docs) por si quisieras utilizar esta plataforma API REST que provee de los servicios lógicos para tus proyectos.
 
-Asimismo, ZENserver viene también con un conector con [Appnima](https://github.com/tapquo/appnima.docs) por si quisieras utilizar esta plataforma en forma de API REST que te provee de los servicios lógicos para tu proyecto.
-
-Teniendo en cuenta lo comentado anteriormente, la estructura básica de ficheros y directorios para trabajar con ZENserver y sus servicios es la que se muestra a continuación:
+Por ello, teniendo en cuenta lo comentado anteriormente, la estructura básica de ficheros y directorios para trabajar con ZENserver y sus servicios es la que se muestra a continuación:
 
 ```
 .
@@ -159,7 +157,7 @@ firewall:
     - sql
 ```
 
-Gracias al atributo **firewall** podemos filtrar peticiones entrantes a nuestro server. Declara las extensiones que tu aplicación no esté configurada para servir y ZENserver se encargará de devolver un `403`. Además, si configuras el parámetro `ip`, los hosts que hagan el número de peticiones indicado serán puestos en la `blacklist.json` para que puedas analizarlo después.
+Gracias al atributo **firewall** podemos filtrar peticiones entrantes a nuestro server. Declara las extensiones que tu aplicación no esté configurada para servir y ZENserver se encargará de devolver un `403`. Además, si configuras el parámetro `ip`, los hosts que hagan el número de peticiones indicado serán puestos en la `blacklist.json` y ZENserver devolverá un `403` antes de que nuevas peticiones vuelvan a llegar a los endpoints.
 
 ```yaml
 # -- CORS Properties -----------------------------------------------------------
@@ -188,11 +186,10 @@ headers:
     - response-time
 ```
 
-Por último podemos establecer el tipo de respuesta de nuestros *endpoints*,
-pudiendo limitar el acceso a los mismos con los típicos parámetros para el
-control *cross-origin*, filtrado de métodos, etc...
+Por último, podemos establecer el tipo de respuesta de nuestros *endpoints*, pudiendo limitar el acceso a los mismos con los típicos parámetros para el control *cross-origin*, filtrado de métodos, etc... Recuerda que si en el apartado de *session* decides cambiar el nombre del parámetro de autorización (`authorization`), deberás reflejar este cambio en el CORS (`Authorization`).
 
 ### 1.3 Servidor HTTPs
+
 
 ### 1.4 Commands
 

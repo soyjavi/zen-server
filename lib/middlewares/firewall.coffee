@@ -33,7 +33,7 @@ module.exports =
       response.run "", code = 403
 
     # -- Add to blacklist
-    if valid is false and request.ip isnt "127.0.0.1"
+    if valid is false and request.ip not in ["127.0.0.1", "::1"]
       ZEN.blacklist[request.ip] = (ZEN.blacklist[request.ip] or 0) + 1
       # @TODO: Write async
       fs.writeFile file_name, JSON.stringify(ZEN.blacklist, null, 0), "utf8"
