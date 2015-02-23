@@ -5,7 +5,7 @@ ZEN           = require "../zen.config"
 
 if ZEN.firewall?
   fs            = require "fs"
-  path_firewall = "#{__dirname}/../../../firewall"
+  path_firewall = "#{__dirname}/../../../../firewall"
   file_name     = "#{path_firewall}/blacklist.json"
   blacklist     = {}
   fs.mkdirSync path_firewall unless fs.existsSync path_firewall
