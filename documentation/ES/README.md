@@ -157,7 +157,7 @@ firewall:
     - sql
 ```
 
-Gracias al atributo **firewall** podemos filtrar peticiones entrantes a nuestro server. Declara las extensiones que tu aplicación no esté configurada para servir y ZENserver se encargará de devolver un `403`. Además, si configuras el parámetro `ip`, los hosts que hagan el número de peticiones indicado serán puestos en la `blacklist.json` y ZENserver devolverá un `403` antes de que nuevas peticiones vuelvan a llegar a los endpoints.
+Gracias al atributo **firewall** podemos filtrar peticiones entrantes a nuestro server. Declara las extensiones que tu aplicación no esté configurada para servir y ZENserver se encargará de devolver un `403 Forbidden`. Además, si configuras el parámetro `ip`, los hosts que hagan el número de peticiones indicado serán puestos en la `blacklist.json` y ZENserver devolverá un `403 Forbidden` antes de que nuevas peticiones vuelvan a llegar a los endpoints.
 
 ```yaml
 # -- CORS Properties -----------------------------------------------------------
@@ -189,6 +189,21 @@ headers:
 Por último, podemos establecer el tipo de respuesta de nuestros *endpoints*, pudiendo limitar el acceso a los mismos con los típicos parámetros para el control *cross-origin*, filtrado de métodos, etc... Recuerda que si en el apartado de *session* decides cambiar el nombre del parámetro de autorización (`authorization`), deberás reflejar este cambio en el CORS (`Authorization`).
 
 ### 1.3 Servidor HTTPs
+ZENserver también permite trabajar como servidor HTTPS. Las modificaciones en nuestro fichero de configuración son mínimas; debemos indicar que el protocolo es **https** y los nombre de los fichero de autenticación:
+
+```yaml
+# -- General Info --------------------------------------------------------------
+protocol : https
+host     : localhost
+port     : 8888
+timezone : Europe/Amsterdam
+
+# -- Certificates --------------------------------------------------------------
+cert: server.crt
+key : server.key
+```
+
+Estos ficheros los debes almacenar en la carpeta **certificates** en la raíz del proyecto. Una vez tengas todo configurado, solo tienes que levantar el servidor como siempre pero ahora la url es bajo HTTPS: `https://127.0.0.1:8888`
 
 
 ### 1.4 Commands
