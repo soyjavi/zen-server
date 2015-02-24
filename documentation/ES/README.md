@@ -93,6 +93,7 @@ Por ello, teniendo en cuenta lo comentado anteriormente, la estructura básica d
 Uno de los beneficios de usar ZEN es que el fichero de configuración (`zen.yml`) cobra una gran importancia a la hora de configurar los servicios disponibles en tu *server*. Vamos a ir analizando cada una de las opciones que nos permite establecer el fichero `zen.yml`:
 
 ```yaml
+# -- General Info --------------------------------------------------------------
 protocol: http # or https
 host    : localhost
 port    : 8888
@@ -249,8 +250,8 @@ Puedes arrancar tu servidor sobreescribiendo los valores del zen.yml pasando por
 línea de comando los siguientes argumentos:
 
 ```bash
-$node [fichero JS] [fichero YML] [ENVIRONMENT] [PUERTO]
-$node zen config production 1980
+  $node [fichero JS] [fichero YML] [ENVIRONMENT] [PUERTO]
+  $node zen config production 1980
 ```
 
 En este ejemplo estamos diciendo a NodeJS que ejecute el fichero zen.js
@@ -376,12 +377,12 @@ envíen. Por ejemplo para la url:
 Obtendríamos automáticamente:
 
 ```json
-{
+  {
     "id"      : "soyjavi",
     "context" : "messages",
     "order_by": "date",
     "page"    : 20
-}
+  }
 ```
 
 Evidentemente podemos acceder a cada uno de los valores de manera independiente,
@@ -445,9 +446,7 @@ zen.get "/domain/:id/:context", (request, response) ->
 <a name="a.2.5"/>
 ### 2.5 HTTP Status Messages
 
-Por ahora solo conocemos el método json de manera superficial, además de
-establecer el objeto que queremos devolver, podemos indicar un *HTTPStatusCode*
-(por defecto 200) y unas *HTTPHeaders*. Por ejemplo:
+Por ahora solo conocemos el método json de manera superficial, además de establecer el objeto que queremos devolver, podemos indicar un *HTTPStatusCode* (por defecto 200) y unas *HTTPHeaders*. Por ejemplo:
 
 ```coffee
 values =
