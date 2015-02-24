@@ -442,7 +442,7 @@ zen.get "/", (request, response) ->
 
 With the method **.page()** we indicate to ZENserver that search a file with name "base" in */www/mustache directory*.
 
-If this file not exists, ZENserver search a 404.mustache file to render. And if you dont create it, ZENserver return a **<h1> 404 - Not found</h1>** HTML.
+If this file not exists, ZENserver search a 404.mustache file to render. And if you dont create it, ZENserver return a `**<h1> 404 - Not found</h1>**` HTML.
 
 <a name="a.3.3"/>
 ### 3.3 Bindings
