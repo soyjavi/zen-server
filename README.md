@@ -1,11 +1,50 @@
 # ZEN-server
 
-Is the main module of ZEN, that there you will find all necessary tools to create web servers with NodeJS. The main difference from others solutions is the not dependence of third modules, very common in NodeJS projects but that ultimately can create problems.
+Is the main module of ZEN, that there you will find all necessary tools to create web servers with NodeJS. The main difference from others solutions is the not dependency of third modules, very common in NodeJS projects but that ultimately can create problems.
 
 Our engagement is use the fewer dependencies and offer our experiences with NodeJS easily and intuitive.
 
+- [Introduction](#a.1)
+  - [Installation](#a.1.1)
+  - [Configuration](#a.1.2)
+  - [HTTPS servers](#a.1.3)
+  - [Commands](#a.1.4)
+- [API server](#a.2)
+  - [Our first API endpoint](#a.2.1)
+  - [URLs](#a.2.2)
+  - [Parameters](#a.2.3)
+  - [Session control](#a.2.4)
+  - [HTTP Status Messages](#a.2.5)
+- [Renderng](#a.3)
+  - [Our firts WWW endpoint](#a.3.1)
+  - [Mustache templates](#a.3.2)
+  - [Bindings](#a.3.3)
+  - [Blocks](#a.3.4)
+  - [Redirections](#a.3.5)
+  - [Render files and streaming](#a.3.6)
+
+
+<a name="a.1"/>
 ## 1. Introduction
 
+ZENserver wants to offer all you need to build applications robust and easy to maintain. Also provides connectors databases with MongoDB and Redis and a connector with [APPNIMA](https://github.com/tapquo/appnima.docs).
+
+So, the basic structure of files and folders to work with those features are:
+
+```
+.
+├── api
+├── common
+│   └── models
+├── environment
+├── www
+│   └── index.html
+├── package.json
+├── zen.js
+├── zen.yml
+```
+
+<a name="a.1.1"/>
 ### 1.1 Installation
 
 To install a new instance of ZENserver only you have to run this command:
@@ -14,7 +53,7 @@ To install a new instance of ZENserver only you have to run this command:
   npm install zenserver --save
 ```
 
-Another option is modify the package.json including this new dependence:
+Another option is modify the package.json including this new dependency:
 
 ```yaml
 {
@@ -33,6 +72,7 @@ We include **coffee-script** package too, because we go to do all examples in th
 
 We believe that CoffeeScript is more maintainable and legible, so if you want to learn more of CoffeeScript you can download this free book <https://leanpub.com/coffeescript>.
 
+<a name="a.1.2"/>
 ### 1.2 Configuration
 
 It is easy to configure ZEN because everything you need is in the configuration file **zen.yml**. We are goint to analyze these options:
@@ -48,6 +88,7 @@ It is easy to configure ZEN because everything you need is in the configuration 
 In this section you can set your server configuration, the protocol that you use (http or https), host name, port and timezone.
 
 ```yaml
+# -- Environment ---------------------------------------------------------------
   environment: development
 ```
 
@@ -85,7 +126,7 @@ statics:
     folder  : /static
 ```
 
-This attribute gives us a simple way to provide static files on our server. We can offer complete directories with the **url** attribute or a specific file by **file**. In both cases we set the path relative to the project directory using the **folder** attribute. In case we need to have cache resources we have to set the number of seconds using the attribute **maxage**.
+This attribute gives us a simple way to provide static files on our server. We can offer complete directories with the **url** attribute or a specific file by **file** attribute. In both cases we set the path relative to the project directory using the **folder** attribute. In case we need to have cache resources we have to set the number of seconds using the attribute **maxage**.
 
 ```yaml
 # -- session -------------------------------------------------------------------
@@ -111,17 +152,27 @@ monitor:
 
 With this attribute we can create an audit to control what happens in our server when it is running. This audit creates a file per day in **/logs** directory with this information:
 
--   Endpoint que se esta solicitando.
--   Método (GET, POST, PUT, DELETE,...).
--   Tiempo de proceso en milisegundos.
--   Código HTTP de respuesta.
--   Tamaño de respuesta en bytes.
--   Cliente (próximamente).
+-   Endpoint requested.
+-   Which methods: GET, POST, PUT, DELETE,...
+-   Processing time in milliseconds.
+-   HTTP code response.
+-   Response length.
+-   Client (coming soon).
 
 
 ![image](https://raw.githubusercontent.com/cat2608/contacts/master/assets/img/screen-18.png)
 
-With this information you can analize all requests of your clients.
+[Learn how to use ZENmonitor](https://github.com/soyjavi/zen-monitor).
+
+```yaml
+# -- firewall ------------------------------------------------------------------
+firewall:
+  ip: 100 #Number of request per firewall rule
+  extensions:
+    - php
+    - sql
+```
+You can control packets transiting using `firewall` option. You just need to set extensions that your application is not configured to handle and ZENserver will return `403 Forbidden`. Also, with `ip` parameter you can set a number of maximum requests that a host can do before get into list **blacklist.json**.
 
 ```yaml
 # -- CORS Properties -----------------------------------------------------------
@@ -153,7 +204,7 @@ headers:
 Finally we set the type of response from our endpoints, to limit access to the same with typical parameters for cross-origin control filtering methods, etc ...
 
 ### 1.3 HTTPS servers
-You can create a HTTPS server with ZENserver just setting the protocol attibute and certificates files names:
+You can create a HTTPS server with ZENserver just setting the protocol attribute and certificates files names:
 
 ```yaml
 # -- General Info --------------------------------------------------------------
@@ -168,7 +219,8 @@ key : server.key
 ```
 This files must be at **certificates* folder at the root of the project. Then you can start your app like always but type in browser: `https://127.0.0.1:8888`.
 
-#### 1.4 Commands
+<a name="a.1.4"/>
+### 1.4 Commands
 To initialize server the command is:
 
 ```bash
@@ -179,7 +231,7 @@ The server runs in the port that you established in **zen.yml** file. You can ov
 
 ```bash
   $node [JS file] [YML file] [ENVIRONMENT] [PORT]
-  $node zen config production 1980
+  $node zen zen production 1980
 
 ```
 
@@ -191,9 +243,13 @@ In this example we established that run *zen.js* file with these attributes:
 
 Note that it is not mandatory to set all parameters but respect the order thereof. With this, in case you want to assign a new port number, you must pass the following arguments.
 
-# 2. API server
+<a name="a.2"/>
+## 2. API server
 
-## 2.1 Our first API endpoint
+As you saw, to work with APIs, we need to store the files into */api* folder.
+
+<a name="a.2.1"/>
+### 2.1 Our first API endpoint
 We go to create a new file called *hello.coffee* in **/api** folder with this code:
 
 ```coffee
@@ -237,12 +293,14 @@ module.exports = (zen) ->
     response.json method: "OPTIONS"
 ```
 
-## 2.2 URLs
+<a name="a.2.2"/>
+### 2.2 URLs
 If we need have conditional URLs and that it is managed by the same endpoint, we might to use the conditional router of ZENserver.
 
 For example, we need an endpoint to get when access to an user and a determinated area like this: */user/soyjavi/messages* or */user/cataflu/followers*, for this we use the conditional URL **/user/:id/:context**
 
-## 2.3 Parameters
+<a name="a.2.3"/>
+### 2.3 Parameters
 With **request.parameters** we have an object with sended parameters. For example, with the URL:
 
 `http://domain.com/user/soyjavi/messages?order_by=date&page=20`
@@ -258,7 +316,8 @@ We have an object like this:
   }
 ```
 
-## 2.4 Session control
+<a name="a.2.4"/>
+### 2.4 Session control
 In case you want to control whether requests that have come to our meeting endpoint can use the request.session which in the case there will return the value of the session object. This may be via cookie or authentication via http.
 If we want to control if the requests have session, we could use the object **request.session**. This migth be via cookie or HTTP authentication.
 
@@ -274,6 +333,7 @@ In the following example show how to established the cookie and how to do logout
     response.json "cookie": false
 ```
 
+<a name="a.2.5"/>
 ## 2.5 HTTP Status Messages
 For now we only know the json method superficially, besides setting the object that we want to return, we can indicate a HttpStatusCode (default 200) and a HTTPHeaders. For example:
 
@@ -328,10 +388,11 @@ Then list all HTTPStatus:
 505: "HTTPVersionNotSupported"
 ```
 
-3. Rendering
-------------
+<a name="a.3"/>
+## 3. Rendering
 
-## 3.1 Our firts WWW endpoint
+<a name="a.3.1"/>
+### 3.1 Our firts WWW endpoint
 We are goint to create *form.coffee* file in **/www** directory and with this code:
 
 ```coffee
@@ -348,7 +409,8 @@ zen.get "/form", (request, response) ->
 
 We use **.html()** method to render all HTML code; it is similar to *.json()*.
 
-## 3.2 Mustache template
+<a name="a.3.2"/>
+### 3.2 Mustache template
 You've learned how to return HTML code in a particular endpoint, but really, this is not efficient option. Now you will learn to use the Mustache templates that are included in zenserver to facilitate reuse and management of your pages correctly.
 
 We are goint to create a file *base.mustache* in **/www/mustache** directory with this code:
@@ -382,7 +444,8 @@ With the method **.page()** we indicate to ZENserver that search a file with nam
 
 If this file not exists, ZENserver search a 404.mustache file to render. And if you dont create it, ZENserver return a **<h1> 404 - Not found</h1>** HTML.
 
-## 3.3 Bindings
+<a name="a.3.3"/>
+### 3.3 Bindings
 In the previous chapter we have seen a simple page rendering by a Mustache file. Anyway we have not used any of the features Mustache offers.
 
 We will send details to our staff so that renderize, this is known as data binding. To do this we will modify our base.mustache template:
@@ -403,7 +466,8 @@ zen.get "/", (request, response) ->
   response.page "base", bindings
 ```
 
-## 3.4 Blocks
+<a name="a.3.4"/>
+### 3.4 Blocks
 Imagine that we will use a section of HTML in multiple pages, it would be better to insulate this HTML code and to include it in all the templates you need, right?. Well let's see what we can do with our mustache template:
 
 ```html
@@ -451,23 +515,23 @@ We have created two references to mustache block *{{> partial.example}}* and *{{
 </section>
 ```
 
-
 Now, from our endpoint we completed the new binding:
 
 ```coffee
-zen.get "/", (request, response, next) ->
-  bindings =
-    title : "zenserver"
-    user:
-      name: "@soyjavi"
-    session: request.session
-    mobile : request.mobile
-  partials = ["partial.example", "partial.session"]
+  zen.get "/", (request, response, next) ->
+    bindings =
+      title : "zenserver"
+      user  :
+        name: "@soyjavi"
+      session: request.session
+      mobile : request.mobile
+    partials = ["partial.example", "partial.session"]
 
-  response.page "base", bindings, partials
+    response.page "base", bindings, partials
 ```
 
-## 3.5 Redirections
+<a name="a.3.5"/>
+### 3.5 Redirections
 If we need to do redirection to an another endpoint, we use the following method **.redirect()**:
 
 ```coffee
@@ -478,7 +542,8 @@ zen.get "/dashboard", (request, response) ->
     response.redirect "/login"
 ```
 
-## 3.6 Render files and streaming
+<a name="a.3.6"/>
+### 3.6 Render files and streaming
 
 Although NodeJS is not the best way to serve static files zenserver provides a simple and efficient solution for this purpose.
 

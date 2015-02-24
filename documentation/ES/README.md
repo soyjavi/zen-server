@@ -90,7 +90,7 @@ Por ello, teniendo en cuenta lo comentado anteriormente, la estructura básica d
 ├── zen.yml
 ```
 
-Uno de los beneficios de usar ZEN es que el fichero de configuración (`zen.yml`) cobra una gran importancia a la hora de configurar los servicios disponibles en tu *server*. Vamos a ir analizando cada una de las opciones que nos permite establecer el fichero `zen.yml`:
+Uno de los beneficios de usar ZEN es que el fichero de configuración `zen.yml` cobra una gran importancia a la hora de configurar los servicios disponibles en tu *server*. Vamos a ir analizando cada una de las opciones que nos permite establecer el fichero `zen.yml`:
 
 ```yaml
 # -- General Info --------------------------------------------------------------
@@ -251,7 +251,7 @@ línea de comando los siguientes argumentos:
 
 ```bash
   $node [fichero JS] [fichero YML] [ENVIRONMENT] [PUERTO]
-  $node zen config production 1980
+  $node zen zen production 1980
 ```
 
 En este ejemplo estamos diciendo a NodeJS que ejecute el fichero zen.js
@@ -277,9 +277,7 @@ nuevo número de puerto, es necesario pasar los argumentos anteriores.
 2. Servidor API
 ---------------
 
-En esa sección aprenderás a crear tu primera API con las diferentes
-funcionalidades y capacidades que te ofrece ZENserver. Como vimos en el capítulo
-1, los endpoints de tipo API debemos alojarlos en la carpeta */api*.
+En esa sección aprenderás a crear tu primera API con las diferentes funcionalidades y capacidades que te ofrece ZENserver. Como vimos en el capítulo 1, los endpoints de tipo API debemos alojarlos en la carpeta */api*.
 
 <a name="a.2.1"/>
 ### 2.1 Nuestro primer *API* endpoint
@@ -689,7 +687,7 @@ Ahora desde nuestro endpoint vamos a completar el binding:
 zen.get "/", (request, response, next) ->
   bindings =
     title : "zenserver"
-    user:
+    user  :
       name: "@soyjavi"
     session: request.session
     mobile : request.mobile
