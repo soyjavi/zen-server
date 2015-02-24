@@ -277,9 +277,7 @@ nuevo número de puerto, es necesario pasar los argumentos anteriores.
 2. Servidor API
 ---------------
 
-En esa sección aprenderás a crear tu primera API con las diferentes
-funcionalidades y capacidades que te ofrece ZENserver. Como vimos en el capítulo
-1, los endpoints de tipo API debemos alojarlos en la carpeta */api*.
+En esa sección aprenderás a crear tu primera API con las diferentes funcionalidades y capacidades que te ofrece ZENserver. Como vimos en el capítulo 1, los endpoints de tipo API debemos alojarlos en la carpeta */api*.
 
 <a name="a.2.1"/>
 ### 2.1 Nuestro primer *API* endpoint
@@ -689,7 +687,7 @@ Ahora desde nuestro endpoint vamos a completar el binding:
 zen.get "/", (request, response, next) ->
   bindings =
     title : "zenserver"
-    user:
+    user  :
       name: "@soyjavi"
     session: request.session
     mobile : request.mobile
