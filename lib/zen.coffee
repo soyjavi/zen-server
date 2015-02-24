@@ -49,21 +49,23 @@ module.exports =
         ZEN.br()
         @
 
-    use: (callback) =>
+    use: (callback, system = false) =>
       @middleware = @middleware or []
-      @middleware.push callback
+      @middleware.push
+        callback: callback
+        system  : system
 
     createEndpoints: ->
-      @use request
-      @use response
-      @use cors
-      @use firewall.blacklist if ZEN.firewall?
-      @use firewall.extensions if ZEN.firewall?
+      @use request, system = true
+      @use response, system = true
+      @use cors, system = true
+      @use firewall.blacklist, system = true if ZEN.firewall?
+      @use firewall.extensions, system = true if ZEN.firewall?
 
       @methods = {}
       CONST.HTTP_METHODS.forEach (method) =>
         @methods[method] = []
-        @[method.toLowerCase()] = (pattern, callback, endpoint = true) ->
+        @[method.toLowerCase()] = (pattern, callback, handler = true) ->
           console.log " ✓".green, "[#{method.substr(0,3)}]".grey, "#{pattern}"
           parameters = []
           for name, regexp of CONST.URL_MATCH
@@ -73,12 +75,13 @@ module.exports =
             .replace(CONST.URL_MATCH.escape, '\\$&')
             .replace(CONST.URL_MATCH.name, '([^\/]*)')
             .replace(CONST.URL_MATCH.splat, '(.*?)')
-          pattern = if endpoint then "^#{pattern}$" else "^#{pattern}"
+          pattern = if handler then "^#{pattern}$" else "^#{pattern}"
 
           @methods[method].push
             pattern   : new RegExp pattern
             callback  : callback
             parameters: parameters
+            handler   : handler
 
     createServer: ->
       @server = __server()
@@ -90,9 +93,6 @@ module.exports =
           __errorStack error
           response.internalServerError()
 
-        for use in @middleware when not response.headersSent
-          use.apply @, [request, response, next]
-
         body = ""
         parameters = {}
         match = undefined
@@ -102,6 +102,10 @@ module.exports =
           if match
             parameters[endpoint.parameters[i]] = value for value, i in match.slice(1)
             break
+
+        for use in @middleware when not response.headersSent
+          if endpoint.handler or use.system
+            use.callback.apply @, [request, response, next]
 
         if match
           parameters[key] = value for key, value of url.parse(request.url, true).query
@@ -180,7 +184,7 @@ module.exports =
                 response.file file, policy.maxage, last_modified
             else
               response.page "404", undefined, undefined, 404
-          , endpoint = false
+          , handler = false
       promise.done undefined, true
       promise
 
