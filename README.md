@@ -1,10 +1,27 @@
 # ZEN-server
 
-Is the main module of ZEN, that there you will find all necessary tools to create web servers with NodeJS. The main difference from others solutions is the not dependence of third modules, very common in NodeJS projects but that ultimately can create problems.
+Is the main module of ZEN, that there you will find all necessary tools to create web servers with NodeJS. The main difference from others solutions is the not dependency of third modules, very common in NodeJS projects but that ultimately can create problems.
 
 Our engagement is use the fewer dependencies and offer our experiences with NodeJS easily and intuitive.
 
 ## 1. Introduction
+
+ZENserver wants to offer all you need to build applications robust and easy to maintain. Also provides connectors databases with MongoDB and Redis and a connector with [APPNIMA](https://github.com/tapquo/appnima.docs).
+
+So, the structure of files and folders to work with those features are:
+
+```
+.
+├── api
+├── common
+│   └── models
+├── environment
+├── www
+│   └── index.html
+├── package.json
+├── zen.js
+├── zen.yml
+```
 
 ### 1.1 Installation
 
@@ -14,7 +31,7 @@ To install a new instance of ZENserver only you have to run this command:
   npm install zenserver --save
 ```
 
-Another option is modify the package.json including this new dependence:
+Another option is modify the package.json including this new dependency:
 
 ```yaml
 {
@@ -48,6 +65,7 @@ It is easy to configure ZEN because everything you need is in the configuration 
 In this section you can set your server configuration, the protocol that you use (http or https), host name, port and timezone.
 
 ```yaml
+# -- Environment ---------------------------------------------------------------
   environment: development
 ```
 
@@ -85,7 +103,7 @@ statics:
     folder  : /static
 ```
 
-This attribute gives us a simple way to provide static files on our server. We can offer complete directories with the **url** attribute or a specific file by **file**. In both cases we set the path relative to the project directory using the **folder** attribute. In case we need to have cache resources we have to set the number of seconds using the attribute **maxage**.
+This attribute gives us a simple way to provide static files on our server. We can offer complete directories with the **url** attribute or a specific file by **file** attribute. In both cases we set the path relative to the project directory using the **folder** attribute. In case we need to have cache resources we have to set the number of seconds using the attribute **maxage**.
 
 ```yaml
 # -- session -------------------------------------------------------------------
@@ -111,17 +129,27 @@ monitor:
 
 With this attribute we can create an audit to control what happens in our server when it is running. This audit creates a file per day in **/logs** directory with this information:
 
--   Endpoint que se esta solicitando.
--   Método (GET, POST, PUT, DELETE,...).
--   Tiempo de proceso en milisegundos.
--   Código HTTP de respuesta.
--   Tamaño de respuesta en bytes.
--   Cliente (próximamente).
+-   Endpoint requested.
+-   Which methods: GET, POST, PUT, DELETE,...
+-   Processing time in milliseconds.
+-   HTTP code response.
+-   Response length.
+-   Client (coming soon).
 
 
 ![image](https://raw.githubusercontent.com/cat2608/contacts/master/assets/img/screen-18.png)
 
-With this information you can analize all requests of your clients.
+[Learn how to use ZENmonitor](https://github.com/soyjavi/zen-monitor).
+
+```yaml
+# -- firewall ------------------------------------------------------------------
+firewall:
+  ip: 100 #Number of request per firewall rule
+  extensions:
+    - php
+    - sql
+```
+You can control packets transiting using `firewall` option. You just need to set extensions that your application is not configured to handle and ZENserver will return `403 Forbidden`. Also, with `ip` parameter you can set a number of maximum requests that a host can do before get into list **blacklist.json**.
 
 ```yaml
 # -- CORS Properties -----------------------------------------------------------
@@ -153,7 +181,7 @@ headers:
 Finally we set the type of response from our endpoints, to limit access to the same with typical parameters for cross-origin control filtering methods, etc ...
 
 ### 1.3 HTTPS servers
-You can create a HTTPS server with ZENserver just setting the protocol attibute and certificates files names:
+You can create a HTTPS server with ZENserver just setting the protocol attribute and certificates files names:
 
 ```yaml
 # -- General Info --------------------------------------------------------------
@@ -179,7 +207,7 @@ The server runs in the port that you established in **zen.yml** file. You can ov
 
 ```bash
   $node [JS file] [YML file] [ENVIRONMENT] [PORT]
-  $node zen config production 1980
+  $node zen zen production 1980
 
 ```
 

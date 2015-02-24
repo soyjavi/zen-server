@@ -90,7 +90,7 @@ Por ello, teniendo en cuenta lo comentado anteriormente, la estructura básica d
 ├── zen.yml
 ```
 
-Uno de los beneficios de usar ZEN es que el fichero de configuración (`zen.yml`) cobra una gran importancia a la hora de configurar los servicios disponibles en tu *server*. Vamos a ir analizando cada una de las opciones que nos permite establecer el fichero `zen.yml`:
+Uno de los beneficios de usar ZEN es que el fichero de configuración `zen.yml` cobra una gran importancia a la hora de configurar los servicios disponibles en tu *server*. Vamos a ir analizando cada una de las opciones que nos permite establecer el fichero `zen.yml`:
 
 ```yaml
 # -- General Info --------------------------------------------------------------
@@ -251,7 +251,7 @@ línea de comando los siguientes argumentos:
 
 ```bash
   $node [fichero JS] [fichero YML] [ENVIRONMENT] [PUERTO]
-  $node zen config production 1980
+  $node zen zen production 1980
 ```
 
 En este ejemplo estamos diciendo a NodeJS que ejecute el fichero zen.js
