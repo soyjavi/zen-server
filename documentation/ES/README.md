@@ -161,12 +161,12 @@ monitor:
 
 El atributo **monitor** nos permite que ZENserver cree una pequeña auditoria de lo que sucede en nuestro servidor mientras se está ejecutando. Genera un fichero por día en el directorio */logs* con información de todas las peticiones que le llegan al servidor. Por cada petición obtenemos los siguientes datos:
 
--   Endpoint que se esta solicitando.
--   Método (GET, POST, PUT, DELETE,...).
--   Tiempo de proceso en milisegundos.
--   Código HTTP de respuesta.
--   Tamaño de respuesta en bytes.
--   Cliente (próximamente).
+  - El estado de la **memoria**
+  - Las **peticiones** recibidas por nuestras instancias
+  - Los **métodos** solicitados: GET, POST, PUT, DELETE, OPTIONS,...
+  - Los **código** de respuesta tanto si son de éxito como si son de errores contemplados por el firewall y no.
+  - Los **mime-types** servidos
+  - Los tipos de **dispositivos**, **sistemas operativos** y **navegadores** que acceden a la aplicación.
 
 ![image](https://raw.githubusercontent.com/cat2608/contacts/master/assets/img/screen-18.png)
 
