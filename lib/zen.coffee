@@ -31,7 +31,7 @@ cors          = require "./middlewares/cors"
 
 module.exports =
   class ZenServer
-    constructor: ->
+    constructor: (file) ->
       do @createEndpoints
       do @createServer
 
@@ -161,7 +161,7 @@ module.exports =
       do @monitor if ZEN.monitor
       for context in ["api", "www"]
         for endpoint in ZEN[context] or []
-          require("../../../#{context}/#{endpoint}") @
+          require("#{(global.ZEN.path or  "../../..")}/#{context}/#{endpoint}") @
       promise.done undefined, true
       promise
 

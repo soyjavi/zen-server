@@ -8,13 +8,19 @@ colors        = require "colors"
 
 module.exports = do ->
   # -- ZEN config file ---------------------------------------------------------
-  file = path.join __dirname, "../../../#{process.argv[2] or 'zen'}.yml"
+  if global.ZEN?.file?
+    file = global.ZEN.file
+  else
+    file = path.join __dirname, "../../../#{process.argv[2] or 'zen'}.yml"
   ZEN = yaml.safeLoad fs.readFileSync(file, "utf8")
 
   # -- ZEN environment (if exists) ---------------------------------------------
   ZEN.type = process.argv[3] or ZEN.environment
   if ZEN.type
-    file = path.join __dirname, "../../../environment/#{ZEN.type}.yml"
+    if global.ZEN?.path?
+      file = path.join global.ZEN.path, "/environment/#{ZEN.type}.yml"
+    else
+      file = path.join __dirname, "../../../environment/#{ZEN.type}.yml"
     environment = yaml.safeLoad fs.readFileSync(file, "utf8")
     ZEN[attribute] = value for attribute, value of environment
 
@@ -39,4 +45,5 @@ module.exports = do ->
     console.log "------------------------------------------------------------------------".grey
     console.log " ▣ #{heading}" if heading
 
+  ZEN.path = global.ZEN?.path
   global.ZEN = ZEN
