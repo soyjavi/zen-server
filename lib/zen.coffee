@@ -31,7 +31,7 @@ cors          = require "./middlewares/cors"
 
 module.exports =
   class ZenServer
-    constructor: (file) ->
+    constructor: ->
       do @createEndpoints
       do @createServer
 
@@ -177,7 +177,8 @@ module.exports =
               file = url.parse(request.url).pathname.replace(policy.url, policy.folder)
             else
               file = "#{policy.folder}/#{policy.file}"
-            file = "#{__dirname}/../../../#{file}"
+
+            file = (global.ZEN.path or "#{__dirname}/../../../") + file
             if fs.existsSync file
               last_modified = fs.statSync(file).mtime
               cache_modified = request.headers["if-modified-since"]
