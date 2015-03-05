@@ -99,7 +99,7 @@ module.exports =
         request_method = @methods[request.headers["access-control-request-method"]]
 
         for key, value of request_method when request.method is "OPTIONS"
-          @methods["OPTIONS"] = request_method if value.pattern.toString().match request.url
+          @methods["OPTIONS"] = request_method if value.pattern?.toString().match request.url
 
         for endpoint in @methods[request.method]
           match = endpoint.pattern.exec url.parse(request.url).pathname
