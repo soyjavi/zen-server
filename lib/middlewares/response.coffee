@@ -115,15 +115,20 @@ __cookie = (value) ->
 
 __cachedMustache = {}
 __mustache = (name) ->
-  dir = "#{__dirname}/../../../../www/mustache/"
+  folder = "#{__dirname}/../../../../www/mustache/"
+  if global.ZEN.path and global.ZEN.mustache?.folder
+    folder_path = "#{global.ZEN.path}/#{global.ZEN.mustache.folder}/"
+
   if __cachedMustache[name] and (global.ZEN.mustache?.cache or not global.ZEN.mustache)
     __cachedMustache[name]
-  else if fs.existsSync file = "#{dir}#{name}.mustache"
+  else if folder_path and fs.existsSync file = "#{folder_path}#{name}.mustache"
     __cachedMustache[name] = fs.readFileSync file, "utf8"
-  else if fs.existsSync file = "#{dir}404.mustache"
+  else if fs.existsSync file = "#{folder}#{name}.mustache"
+    __cachedMustache[name] = fs.readFileSync file, "utf8"
+  else if fs.existsSync file = "#{folder}404.mustache"
     __cachedMustache[name] = fs.readFileSync file, "utf8"
   else
-    __cachedMustache[name] = "<h1> 404 - Not found</h1>"
+    __cachedMustache[name] = "<h1>404 - Not found</h1>"
 
 __output = (request, code, type = "", body = "", audit = true) ->
   latence = new Date() - request.at
