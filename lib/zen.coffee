@@ -232,7 +232,7 @@ __time = (value) -> (new Date(value)).getTime()
 
 __server = ->
   if ZEN.protocol is "https"
-    certificates = __dirname + "/../../../certificates/"
+    certificates = (ZEN.path or "#{__dirname}/../../..") + "/certificates/"
     https.createServer
       cert  : fs.readFileSync("#{certificates}#{ZEN.cert}")
       key   : fs.readFileSync("#{certificates}#{ZEN.key}")
