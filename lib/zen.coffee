@@ -108,7 +108,7 @@ module.exports =
             break
 
         for use in @middleware when not response.headersSent
-          if endpoint.handler or use.system
+          if endpoint?.handler or use.system
             use.callback.apply @, [request, response, next]
 
         if match
