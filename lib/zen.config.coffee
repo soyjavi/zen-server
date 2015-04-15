@@ -25,7 +25,7 @@ module.exports = do ->
     ZEN[attribute] = value for attribute, value of environment
 
   # -- ZEN port ----------------------------------------------------------------
-  ZEN.port = process.argv[4] or process.env.PORT or 1337
+  ZEN.port = process.argv[4] or ZEN.port or process.env.PORT or 1337
 
   # -- ZEN timezone ------------------------------------------------------------
   process.env.TZ = ZEN.timezone if ZEN.timezone
