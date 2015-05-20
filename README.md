@@ -226,6 +226,13 @@ To initialize server the command is:
 ```bash
   $node zen.js zen
 ```
+ The content of **zen.js** must be:
+
+```javascript
+
+require('zenserver').start();
+
+```
 
 The server runs in the port that you established in **zen.yml** file. You can overwrite values of zen.yml with command line:
 

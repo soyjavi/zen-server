@@ -243,6 +243,14 @@ servidor es de la siguiente manera:
 $node zen.js zen
 ```
 
+El fichero **zen.js** debe ser configurado de la siguiente forma:
+
+```javascript
+
+require('zenserver').start();
+
+```
+
 De esta forma, el servidor arrancará en el puerto que hayas establecido en el
 fichero zen.yml así como el environment declarado.
 
