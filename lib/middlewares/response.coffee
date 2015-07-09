@@ -54,14 +54,16 @@ middleware =
   html: (value, body, headers = {}) ->
     @run value.toString(), body, "text/html", headers
 
-  page: (file, bindings = {}, partials = [], code, headers = {}) ->
+  page: (file, bindings = {}, partials = [], code, headers = {}, markup = null) ->
     files = {}
     files[partial] = __mustache partial for partial in partials or []
     for key, value of bindings when value? and not value is false
       bindings.if = bindings.if or {}
       bindings.if[key] = true
     bindings.zen = global.ZEN
-    @html mustache.render(__mustache(file), bindings, files), code
+    template = __mustache file
+    if markup then template = __attach markup, template
+    @html mustache.render(template, bindings, files), code
 
   json: (data = {}, code, headers = {}, audit = true) ->
     for key, value of global.ZEN.headers when not headers[key]
@@ -129,6 +131,10 @@ __mustache = (name) ->
     __cachedMustache[name] = fs.readFileSync file, "utf8"
   else
     __cachedMustache[name] = "<h1>404 - Not found</h1>"
+
+__attach = (markup, template) ->
+  position =  template.search /<body>/
+  template.slice(0, position + "<body>".length) + markup + template.slice(position)
 
 __output = (request, code, type = "", body = "", audit = true) ->
   latence = new Date() - request.at
