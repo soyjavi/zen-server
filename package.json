@@ -1,9 +1,9 @@
 {
-  "name": "zenserver",
-  "version": "1.4.18",
-  "description": "a lean and mean http router for node.js",
-  "homepage": "https://github.com/soyjavi/zenproxy",
-  "keywords": [
+  "name"        : "zenserver",
+  "version"     : "1.7.9",
+  "description" : "a lean and mean http router for node.js",
+  "homepage"    : "https://github.com/soyjavi/zenproxy",
+  "keywords"    : [
     "server",
     "router",
     "restful",
@@ -17,30 +17,30 @@
     "streaming"
   ],
   "author": {
-    "name": "Javi Jimenez",
+    "name" : "Javi Jimenez",
     "email": "javi@tapquo.com"
   },
   "contributors": [
     {
-      "name": "Catalina Oyaneder",
+      "name" : "Catalina Oyaneder",
       "email": "cat2608@gmail.com"
     },
     {
-      "name": "David Rey",
+      "name" : "David Rey",
       "email": "david.rey.acosta@gmail.com"
     }
   ],
-  "dependencies": {
+  "dependencies"    : {
     "coffee-script": "*",
-    "colors": "*",
-    "formidable": "*",
-    "hope": "*",
-    "js-yaml": "*",
-    "mongoose": "*",
-    "mustache": "*",
-    "redis": "*"
+    "colors"       : "*",
+    "formidable"   : "*",
+    "hope"         : "*",
+    "js-yaml"      : "*",
+    "mongoose"     : "*",
+    "mustache"     : "*",
+    "redis"        : "*"
   },
-  "main": "./zen.proxy.js",
+  "main"   : "./zen.proxy.js",
   "engines": {
     "node": "*"
   }
