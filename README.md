@@ -34,11 +34,12 @@ So, the basic structure of files and folders to work with those features are:
 ```
 .
 ├── api
+│   └── index.coffee
 ├── common
 │   └── models
 ├── environment
 ├── www
-│   └── index.html
+│   └── index.coffee
 ├── package.json
 ├── zen.js
 ├── zen.yml
